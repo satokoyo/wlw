@@ -1,7 +1,7 @@
 /* Wonder Deck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.1.1';
+  const VERSION = '1.1.2';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
@@ -73,7 +73,7 @@
     if (!['skill','assist','soul','mskill'].includes(slot.type)) return '不明な枠です';
     return '';
   }
-  const categoryKey = c => ['mskill','soul'].includes(c.kind) ? c.kind : c.kind+':'+(c.category || 'unknown');
+  const categoryKey = c => ['skill','mskill','soul'].includes(c.kind) ? c.kind : c.kind+':'+(c.category || 'unknown');
   const categoryName = key => LABEL[key] || ((key.startsWith('skill:')?'スキル・':'')+(CAT[key.split(':')[1]] || '分類未取得'));
   const cardCategoryText = c => c.kind==='assist' ? CAT[c.category] || '分類未取得' : c.kind==='skill' ? 'スキル・'+(CAT[c.category] || '分類未取得') : LABEL[c.kind] || '種別未取得';
   const levelOrder = c => c.kind==='mskill' ? 98 : Number.isFinite(c.level) && c.level>0 ? c.level : 99;
@@ -111,11 +111,42 @@
   }
   const recommendedCards = cards => cards.filter(c=>c.rank).sort((a,b)=>(a.recommendationOrder ?? a.rank)-(b.recommendationOrder ?? b.rank));
   function deckSignature(deck) { return JSON.stringify(slotsOf(deck).map(s => [s.type,s.slot,s.id])); }
+  // Only equipment-count conditions are evaluated; battle state is unavailable.
+  function equipmentConditions(card) {
+    const text=effectText(card?.effect).normalize('NFKC').replace(/\s/g,'');
+    const clauses=text.match(/(?:このカード以外に|レアリティが|カテゴリが|(?:装備|セット)している|マスタースキル(?:が|の)|ソウルカード(?:が|の)|アシストカード(?:が|の))[^。〔〕]*?場合/g) || [];
+    return clauses.map(text=>{
+      const m=text.match(/^(このカード以外に)?(?:レアリティが(SR|WR|R|N)の)?(?:カテゴリが(ソウルではない|武器|防具|装飾|道具|ソウル)(?:の)?)?アシストカードが(\d+)枚以上発動している場合$/);
+      return m?{text,excludeSelf:!!m[1],rarity:m[2]?Number(Object.keys(RARITY).find(k=>RARITY[k]===m[2])):null,category:m[3]||null,min:Number(m[4])}:{text,unknown:true};
+    });
+  }
+  function equipmentStars(card, deck, catalog) {
+    if(!card || !['assist','soul'].includes(card.kind))return {stars:'',title:''};
+    const rules=equipmentConditions(card);
+    if(!rules.length)return {stars:'',title:''};
+    const equipped=slotsOf(deck || {}).filter(s=>s.id && ['assist','soul'].includes(s.type));
+    const values=rules.map(rule=>{
+      if(rule.unknown)return null;
+      let yes=0,unknown=0;
+      for(const slot of equipped){
+        if(rule.excludeSelf && slot.id===card.id)continue;
+        const c=catalog.get(slot.id);let match=true;
+        if(rule.rarity){if(!c || !RARITY[c.rarity])match=null;else if(c.rarity!==rule.rarity)continue;}
+        if(rule.category){
+          const category=rule.category==='ソウルではない' ? (slot.type==='assist') : rule.category==='ソウル' ? (slot.type==='soul') : (!c || !CAT[c.category]?null:CAT[c.category]===rule.category);
+          if(category===false)continue;if(category===null)match=null;
+        }
+        if(match===true)yes++;else unknown++;
+      }
+      return yes>=rule.min?true:yes+unknown<rule.min?false:null;
+    });
+    return {stars:values.map(v=>v===null?'？':v?'★':'☆').join(''),title:'装備構成の条件（各カードの使用可能レベル到達時）\n'+rules.map((r,i)=>(values[i]===null?'未判定':values[i]?'満たす':'不足')+'：'+r.text).join('\n')};
+  }
   class Engine {
     constructor(api, catalog, notify) {
       this.api=api; this.catalog=catalog; this.notify=notify || (()=>{});
       this.cast=''; this.deck=null; this.slot=null; this.cards=[]; this.rankings=[]; this.selected=null;
-      this.pending=false; this.loading=false; this.uncertain=null; this.epoch=0; this.status=''; this.error=''; this.disposed=false; this.successes=0;
+      this.detailAttempts=new Set();this.pending=false; this.loading=false; this.uncertain=null; this.epoch=0; this.status=''; this.error=''; this.disposed=false; this.successes=0;
     }
     emit() { if (!this.disposed) this.notify(this); }
     get locked() { return this.pending || !!this.uncertain; }
@@ -123,7 +154,7 @@
     get current() { return this.slots.find(s=>sameSlot(s,this.slot)); }
     async changeCast(cast, wanted) {
       if (this.locked || this.disposed) return false;
-      const ticket=++this.epoch; this.cast=String(cast); this.loading=true; this.deck=null; this.slot=null; this.cards=[];this.rankings=[];this.selected=null;this.error='';this.status='キャストのデッキを読み込み中…';this.emit();
+      const ticket=++this.epoch;this.detailAttempts=new Set(); this.cast=String(cast); this.loading=true; this.deck=null; this.slot=null; this.cards=[];this.rankings=[];this.selected=null;this.error='';this.status='キャストのデッキを読み込み中…';this.emit();
       try {
         const deck=await this.api.deck(this.cast);
         if (ticket!==this.epoch || this.disposed) return false;
@@ -145,8 +176,30 @@
         if(ticket!==this.epoch || this.disposed)return false;
         if(d.setcast && String(d.setcast.id)!==cast)throw Error('候補のキャストが一致しません');
         this.castName=d.setcast && d.setcast.name;
+        this.installCandidates(d);await this.hydrateDeckDetails(cast,ticket);
+        if(ticket!==this.epoch || this.disposed)return false;
         this.installCandidates(d);this.loading=false;this.status='枠を選び、カードの詳細を確認してセット';this.emit();return true;
       }catch(e){if(ticket===this.epoch){this.loading=false;this.error=e.message;this.status='候補を取得できませんでした';this.emit();}return false;}
+    }
+    async hydrateDeckDetails(cast,ticket) {
+      // Card names API omits rarity. Fetch detailed candidates once per missing
+      // equipped/recommended kind, then reuse static metadata for this session.
+      for(const kind of ['skill','assist','soul','mskill']){
+        if(ticket!==this.epoch || this.disposed)return;
+        const missing=this.slots.find(s=>s.id && s.editable && s.kind===kind && unavailableReason(this.catalog.get(s.id)));
+        const ranked=this.rankings.some(c=>c.kind===kind && c.owned && unavailableReason(this.catalog.get(c.id) || c));
+        if((!missing && !ranked) || this.detailAttempts.has(kind))continue;
+        const target=this.slots.find(s=>s.type===kind && s.editable && (!this.catalog.get(s.id) || unavailableReason(this.catalog.get(s.id)))) || this.slots.find(s=>s.type===kind && s.editable) || missing;
+        if(!target)continue;this.detailAttempts.add(kind);
+        try{
+          const detail=await this.api.candidates(cast,target);
+          if(ticket!==this.epoch || this.disposed)return;
+          if(detail.setcast && String(detail.setcast.id)!==cast)throw Error('詳細のキャストが一致しません');
+          for(const raw of [detail.setcard,...(detail.card || [])])if(raw && validID(raw.ci)){
+            const c=normalizeCard(raw,'deck',this.catalog);this.catalog.set(c.id,c);
+          }
+        }catch(error){if(ticket===this.epoch)this.error='一部のカード情報を補完できません。再読込してください：'+error.message;}
+      }
     }
     installCandidates(d) {
       this.currentDetail=d.setcard && validID(d.setcard.ci) ? normalizeCard(d.setcard,'deck',this.catalog) : null;
@@ -232,9 +285,16 @@
     }
     dispose(){if(this.locked)return false;this.disposed=true;this.epoch++;return true;}
   }
-  if(typeof module==='object' && module.exports){module.exports={Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
+  if(typeof module==='object' && module.exports){module.exports={equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
   if(location.origin!=='https://wonderland-wars.net' || !/^\/deck\/(index|deckchange)\.html$/.test(location.pathname)){alert('Wonder.NETのカード編集画面で実行してください。');return;}
-  if(window.__wonderDeck){window.__wonderDeck.show();return;}
+  let resume=null;
+  if(window.__wonderDeck){
+    const previous=window.__wonderDeck;
+    if(previous.version===VERSION){previous.show();return;}
+    if(previous.state?.locked){previous.show();alert('保存または再照合が完了してから、新しいブックマークを実行してください。');return;}
+    resume={cast:previous.state?.cast,slot:previous.state?.slot};previous.close();
+    if(window.__wonderDeck)return;
+  }
   const aborts=new Set();
   async function request(path,format) {
     const url=new URL(path,location.origin);if(url.origin!==location.origin)throw Error('通信先が一致しません');
@@ -269,7 +329,7 @@
   viewport.setAttribute('content','width=device-width, initial-scale=1');
   root.innerHTML=`<style>
 :host{color-scheme:light}*{box-sizing:border-box}button,input,select{font:inherit;color:#29251e}button,select,input{border:1px solid #a59a86;border-radius:7px;background:#f7f2e8}button{padding:8px 11px;cursor:pointer}button:hover{border-color:#087f8c;background:#e0efeb}button:disabled{cursor:default;opacity:.45}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #008596;outline-offset:2px}input[type=search]{width:100%;padding:10px 12px;background:#fffdf7}select{padding:7px;max-width:100%}input[type=checkbox]{accent-color:#07848f}h1,h2,h3,h4,p{margin:0}h2{font-size:16px}small,.muted{color:#655e53}.shell{height:100%;height:100dvh;display:flex;flex-direction:column;background:#e9e1d2 url(/common/images/bg_base.jpg) center/cover;color:#27231e;font:14px/1.5 system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color-scheme:light}.top{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid #897e6c;background:#eee7d9 url(/common/images/bg_body.jpg);flex-wrap:wrap}.brand{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800}.brand img{width:156px;height:auto;display:block}.brand span{color:#9e1731}.spacer{flex:1}.status{font-size:12px;color:#333c3a;padding:6px 18px;min-height:30px;background:#f2eee4;border-bottom:1px solid #a69a86}.status.error{color:#8f231e}.layout{max-width:1760px;width:calc(100% - 24px);margin:0 auto 12px;border:1px solid #877b64;box-shadow:0 5px 22px #0006;background:#f7f1e7 url(/common/images/bg_body.jpg);display:grid;grid-template-columns:304px minmax(300px,1fr) 300px;flex:1;min-height:0}.pane{min-height:0;overflow:auto;padding:14px;overscroll-behavior:contain}.deck{background:#faf7efeb;border-right:1px solid #b3a68d;padding:10px}.catalog{background:#fffcf6c7}.detail{background:#faf6ee url(/common/images/bg_body.jpg) repeat-y;background-size:100% auto;border-left:1px solid #b3a68d}.deck-row{display:grid;grid-template-columns:3fr 1fr;gap:5px;margin-bottom:8px}.deck-row.equipment{grid-template-columns:4fr 1fr}.deck-group{min-width:0}.section{font-size:11px;color:#fff;background:#282524 url(/common/images/h3_bg01.png) center/100% 100%;text-align:center;padding:3px 1px;margin-bottom:4px;white-space:nowrap}.slot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}.single .slot-grid{grid-template-columns:minmax(0,1fr)}.equipment .slot-grid,.reserve .slot-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.equipment .single .slot-grid{grid-template-columns:minmax(0,1fr)}.slot{position:relative;display:flex;flex-direction:column;gap:3px;align-items:center;width:100%;min-width:0;text-align:center;background:#fffaf0;border-color:#d8ccba;padding:4px 2px}.slot.active{border-color:#0c8792;background:#dceddf;box-shadow:inset 0 0 0 1px #0c8792}.slot img{width:34px;height:48px;object-fit:contain}.slot b{font-size:10px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;min-height:26px}.slot .empty-slot{height:48px;display:grid;place-items:center;color:#796d58;font-size:11px}.slot .restriction{position:absolute;right:0;top:0;background:#d9eadc;border-radius:3px;font-size:9px;padding:0 2px;color:#245142}.foot{font-size:9px;color:#6c6355;margin-top:8px}.toolbar{display:flex;gap:8px;align-items:center;margin:9px 0;flex-wrap:wrap}.toolbar label{font-size:12px;display:flex;align-items:center;gap:4px}.toolbar button{font-size:12px;padding:6px}.toolbar small{font-size:11px}#target{color:#fff;background:#222 url(/common/images/h2_bg.png) center/100% 100%;text-align:center;padding:9px 14px;font-size:15px}.category-tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:2px solid #07848f;margin:10px 0 12px;padding-bottom:5px}.category-tabs button{padding:6px 9px;font-size:12px;border-radius:6px 6px 0 0;background:#f4eddf}.category-tabs button[aria-selected=true]{background:#087f8c;border-color:#087f8c;color:white;font-weight:700}.filters{background:#f2ecdf;border:1px solid #b5aa93;border-radius:8px;padding:9px;margin-bottom:10px}.filters summary{cursor:pointer;color:#39342b}.filter-row{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.filter-row strong{font-size:11px;min-width:66px;color:#51483c}.check{font-size:11px;background:#e9e1d1;border-radius:5px;padding:5px;display:inline-flex;align-items:center;gap:2px}.conditions{font-size:11px;color:#245a53;line-height:1.6;margin:8px 0;overflow-wrap:anywhere}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}.group-heading,.level-heading{grid-column:1/-1}.group-heading{font-size:15px;color:#624414;border-bottom:2px solid #bfa66d;margin-top:10px;padding:3px 1px}.group-heading{margin-bottom:8px}.group-heading.other{color:#334c49;border-color:#9baca5}.level-heading{display:flex;align-items:center;gap:9px;font-size:12px;color:#534935;padding:5px 0 0}.level-heading:after{content:'';height:1px;flex:1;background:#c3b59c}.card{position:relative;text-align:left;padding:7px;background:#fffdf6;border-color:#b7ab95;min-width:0;display:flex;flex-direction:column;gap:5px}.card.selected{border-color:#078896;box-shadow:0 0 0 1px #078896}.card img{width:100%;aspect-ratio:120/169;object-fit:contain;min-height:0}.card b{font-size:11px;line-height:1.5;overflow-wrap:anywhere}.card .meta{font-size:10px;color:#625b4f}.rank{position:absolute;left:4px;top:4px;background:#f8d885;color:#362711;padding:2px 4px;border-radius:4px;font-size:10px;font-weight:700}.card.unowned:disabled{opacity:.5;filter:grayscale(.6);background:#eee9df;cursor:not-allowed}.more{width:100%;margin:16px 0}.detail-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:14px}.detail-title button{display:none}.portrait{display:block;width:150px;max-height:225px;object-fit:contain;margin:10px auto}.effect{white-space:pre-wrap;font-size:13px;line-height:1.8;margin:14px 0;overflow-wrap:anywhere}.up{color:#a8261d}.down{color:#185f9b}.data{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.data span{padding:4px 7px;background:#e7dfcf;border-radius:5px;font-size:11px}.actions{position:sticky;bottom:-14px;background:#faf6ee;padding:12px 0;display:grid;gap:8px}.primary{background:#087f8c;border-color:#087f8c;color:#fff;font-weight:800}.primary:hover{background:#066873;color:#fff}.reason{font-size:12px;line-height:1.5;color:#715637}.empty{padding:28px 8px;color:#5e594e;line-height:1.8}.mobile-nav{display:none}.reconcile{background:#ebd4ad}.cast-picker{position:absolute;z-index:5;top:60px;left:12px;right:12px;max-width:740px;max-height:70vh;overflow:auto;background:#f7f1e5;border:1px solid #80765f;border-radius:12px;padding:16px;box-shadow:0 20px 80px #000a}.cast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;margin-top:12px}.cast-grid button{font-size:12px;display:flex;align-items:center;gap:5px;text-align:left}.cast-icon{display:block;flex:none;width:40px;height:16px;overflow:hidden}.cast-grid .cast-icon img{display:block;width:40px;height:auto;max-width:none}.cast-name{min-width:0;overflow-wrap:anywhere}.cast-grid button[aria-pressed=true]{border-color:#07848f;background:#e0efeb}.cast-picker[hidden]{display:none}.detail-backdrop{display:none}
-.card{display:block;padding:0;aspect-ratio:120/190;overflow:hidden;isolation:isolate}.card img{position:absolute;top:0;left:0;display:block;width:100%;height:auto;aspect-ratio:120/169;object-fit:contain}.card-caption{position:absolute;left:0;right:0;bottom:0;height:94px;display:grid;grid-template-rows:43px 12px 12px 12px;gap:2px;padding:5px 5px 4px;background:linear-gradient(#fff9e9e8,#fff9e9fa);color:#24211b;box-shadow:0 -1px 0 #4f463855}.card b{font-size:11px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.card .meta{font-size:9px;line-height:12px;color:#413d32;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card .category{font-weight:600}.card-state{font-weight:600}.rank{z-index:1;top:3px;left:3px;padding:2px 3px;font-size:9px}.card.unowned:disabled{opacity:.5}
+.card{display:flex;flex-direction:column;gap:0;align-self:start;padding:0;overflow:hidden;isolation:isolate}.card-art{position:relative;display:block;width:100%;aspect-ratio:160/169;overflow:hidden;flex:none}.card .card-art img{position:absolute;top:0;left:0;display:block;width:100%;height:auto;aspect-ratio:120/169;object-fit:contain}.card-caption{position:relative;width:100%;height:94px;flex:none;display:grid;grid-template-rows:43px 12px 12px 12px;gap:2px;padding:5px 5px 4px;background:linear-gradient(#fff9e9e8,#fff9e9fa);color:#24211b;box-shadow:0 -1px 0 #4f463855}.card b{font-size:11px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.card .meta{font-size:9px;line-height:12px;color:#413d32;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card .category{font-weight:600}.card-state{font-weight:600}.condition-stars{color:#895800;font-weight:800;margin-right:2px}.rank{z-index:1;top:3px;left:3px;padding:2px 3px;font-size:9px}.card.unowned:disabled{opacity:.5}
 @media(min-width:1450px){.layout{grid-template-columns:330px minmax(400px,1fr) 350px}.grid{grid-template-columns:repeat(auto-fill,minmax(115px,1fr))}.slot img{width:38px;height:54px}.slot b{font-size:11px}}
 @media(max-width:1080px){.layout{grid-template-columns:280px minmax(250px,1fr)}.detail{display:none}.detail.open{display:flex;position:absolute;right:0;top:0;bottom:0;width:min(400px,90vw);z-index:9;box-shadow:-20px 0 60px #0008}.detail-title button{display:block}.detail-backdrop.open{display:block;position:absolute;inset:0;background:#0008;z-index:8}}
 @media(max-width:700px){.top{padding:8px 12px;gap:5px}.brand{font-size:11px;gap:4px}.brand img{width:110px}.top button{padding:8px;font-size:12px}.top .version,.top .spacer{display:none}.top{display:grid;grid-template-columns:minmax(0,1fr) auto auto}.top .brand{grid-column:1/3}.top [data-action=close]{grid-column:3;grid-row:1}.top #cast-current{grid-column:1/3;grid-row:2;margin:0;text-align:left}.top [data-action=reload]{grid-column:3;grid-row:2}.status{padding:6px 12px;font-size:11px}.mobile-nav{display:flex;gap:8px;padding:5px 12px;background:#eae2d2}.mobile-nav button{flex:1}.mobile-nav button.active{background:#d1e8e2;border-color:#078796}.layout{display:block;position:relative;width:100%;margin:0;border:0;box-shadow:none}.pane{height:100%;padding:12px}.deck{display:none}.shell[data-tab=deck] .deck{display:block}.shell[data-tab=deck] .catalog{display:none}.slot img{width:38px;height:54px}.slot b{font-size:11px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.card{padding:0}.card b{font-size:10px}.detail.open{top:8%;bottom:0;width:100%;height:92%;border-radius:16px 16px 0 0;padding:18px;padding-bottom:env(safe-area-inset-bottom,16px);background:#faf6ee}.detail .portrait{width:120px}.detail-title h2{font-size:17px}.actions{bottom:-18px;padding-bottom:max(16px,env(safe-area-inset-bottom))}.filter-row strong{width:100%}}
@@ -291,9 +351,10 @@
   function renderDeck(e,busy){
     const group=(type,label,cls='')=>`<section class="deck-group ${cls}" aria-label="${label}"><h3 class="section">${label}</h3><div class="slot-grid">${e.slots.filter(s=>s.type===type && !(s.type==='skill' && s.slot===0)).map(s=>{
       const c=catalog.get(s.id) || e.rankings.find(c=>c.id===s.id) || {id:s.id,name:s.id?'名称未取得':'未設定',kind:s.kind};
-      return `<button class="slot ${sameSlot(s,e.slot)?'active':''}" data-action="slot" data-value="${slotKey(s)}" title="${esc(slotLabel(s)+'：'+c.name)}" aria-label="${esc(slotLabel(s)+'：'+c.name)}" ${busy?'disabled':''}>${s.id?`<img src="${img(c)}" alt="">`:'<span class="empty-slot">空き</span>'}${s.type==='assist' && s.slot===9?'<span class="restriction">6+</span>':''}<b>${esc(c.name)}</b></button>`;
+      const condition=['assist','soul'].includes(s.type)?equipmentStars(c,e.deck,catalog):{stars:'',title:''};
+      return `<button class="slot ${sameSlot(s,e.slot)?'active':''}" data-action="slot" data-value="${slotKey(s)}" title="${esc(slotLabel(s)+'：'+c.name+(condition.title?'\n'+condition.title:''))}" aria-label="${esc(slotLabel(s)+'：'+c.name+(condition.title?' '+condition.title:''))}" ${busy?'disabled':''}>${s.id?`<img src="${img(c)}" alt="">`:'<span class="empty-slot">空き</span>'}${s.type==='assist' && s.slot===9?'<span class="restriction">6+</span>':''}<b>${condition.stars?`<span class="condition-stars">${condition.stars}</span>`:''}${esc(c.name)}</b></button>`;
     }).join('')}</div></section>`;
-    $('.deck').innerHTML='<div class="deck-row">'+group('skill','スキル')+group('mskill','マスター','single')+'</div><div class="deck-row equipment">'+group('assist','アシスト')+group('soul','ソウル','single')+'</div>'+group('reserve','リザーブ','reserve')+'<p class="foot">カード画像・データ ©SEGA</p>';
+    $('.deck').innerHTML='<div class="deck-row">'+group('skill','スキル')+group('mskill','マスター','single')+'</div><div class="deck-row equipment">'+group('assist','アシスト')+group('soul','ソウル','single')+'</div>'+group('reserve','リザーブ','reserve')+'<p class="foot">★装備条件成立／☆不足／？未判定<br>各カードの使用可能Lv到達時の構成判定<br>カード画像・データ ©SEGA</p>';
   }
   function renderCategoryTabs(){
     const keys=[...new Set(engine.cards.map(categoryKey))].sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
@@ -312,7 +373,7 @@
     $('#cast-current').disabled=busy;$$('[data-action=reload],[data-action=close]').forEach(b=>b.disabled=busy);
     message((e.error?e.error+' ｜ ':'')+e.status,!!e.error);
     if(e.uncertain){const b=document.createElement('button');b.textContent='保存結果を再照合';b.dataset.action='reconcile';b.disabled=e.pending;b.className='reconcile';$('#status').append(' ',b);}
-    const deckKey=e.deck?deckSignature(e.deck)+'|'+(e.slot?slotKey(e.slot):'')+'|'+busy:'';
+    const deckKey=e.deck?deckSignature(e.deck)+'|'+(e.slot?slotKey(e.slot):'')+'|'+busy+'|'+e.loading:'';
     if(e.deck && deckKey!==deckRenderKey){
       deckRenderKey=deckKey;
       renderDeck(e,busy);
@@ -327,7 +388,7 @@
     const unavailable=unavailableReason(c);
     const state=!c.owned?'未所持':unavailable?'情報未取得':c.equipped?'他枠に装備中':c.viewOnly?'閲覧用':'';
     const stats=[c.kind!=='mskill' && c.level?'Lv.'+c.level:'',RARITY[c.rarity]||'',c.owned?overlap(c):''].filter(Boolean).join(' · ');
-    return `<button class="card ${e.selected?.id===c.id?'selected':''} ${unavailable?'unowned':''}" data-action="card" data-value="${c.id}" aria-label="${esc(c.name)}${unavailable?'（'+esc(unavailable)+'）':'の詳細'}" title="${esc(unavailable || c.name+' / '+cardCategoryText(c)+' / '+stats)}" ${unavailable?'disabled':''}>${c.rank?`<span class="rank">おすすめ ${c.rank}</span>`:''}<img loading="lazy" decoding="async" src="${img(c)}" alt=""><span class="card-caption"><b>${esc(c.name)}</b><span class="meta category">${esc(cardCategoryText(c))}</span><span class="meta">${esc(stats)}</span><span class="meta card-state">${state}</span></span></button>`;
+    return `<button class="card ${e.selected?.id===c.id?'selected':''} ${unavailable?'unowned':''}" data-action="card" data-value="${c.id}" aria-label="${esc(c.name)}${unavailable?'（'+esc(unavailable)+'）':'の詳細'}" title="${esc(unavailable || c.name+' / '+cardCategoryText(c)+' / '+stats)}" ${unavailable?'disabled':''}>${c.rank?`<span class="rank">おすすめ ${c.rank}</span>`:''}<span class="card-art"><img loading="lazy" decoding="async" src="${img(c)}" alt=""></span><span class="card-caption"><b>${esc(c.name)}</b><span class="meta category">${esc(cardCategoryText(c))}</span><span class="meta">${esc(stats)}</span><span class="meta card-state">${state}</span></span></button>`;
   }
   function renderCards(){
     if(!engine)return;
@@ -410,7 +471,7 @@
     try{
       const q=new URLSearchParams(location.search);
       const selected=document.querySelector('[data-cast] a.on')?.parentElement.dataset.cast;
-      const cast=selected || (/^#\d+$/.test(location.hash)?location.hash.slice(1):q.get('cast')) || document.querySelector('#hcast')?.textContent.trim();
+      const cast=resume?.cast || selected || (/^#\d+$/.test(location.hash)?location.hash.slice(1):q.get('cast')) || document.querySelector('#hcast')?.textContent.trim();
       if(cast==null || !/^\d+$/.test(cast))throw Error('表示中のキャストを特定できません');
       let castDoc=document;
       if(!document.querySelector('[data-cast]'))castDoc=new DOMParser().parseFromString(await request('/deck/index.html?cast='+cast,'text'),'text/html');
@@ -424,7 +485,7 @@
       if(!castList.some(c=>c.id===cast))castList.push({id:cast,name:names.get(cast)||'キャスト '+cast});
       $('.cast-grid').innerHTML=castList.map(c=>`<button data-action="cast" data-value="${esc(c.id)}">${c.image?`<span class="cast-icon"><img src="${esc(new URL(c.image,location.href).href)}" alt=""></span>`:''}<span class="cast-name">${esc(c.name)}</span></button>`).join('');
       engine=new Engine(api,catalog,render);
-      await engine.changeCast(cast,q.has('slot')?{type:q.get('type'),slot:Number(q.get('slot'))}:null);
+      await engine.changeCast(cast,resume?.slot || (q.has('slot')?{type:q.get('type'),slot:Number(q.get('slot'))}:null));
     }catch(e){message(e.message,true);}finally{booting=false;}
   }
   boot();

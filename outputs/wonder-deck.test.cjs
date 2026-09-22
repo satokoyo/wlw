@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('./wonder-deck.js');
+const {equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('./wonder-deck.js');
 const id=n=>n.toString(16).padStart(32,'0');
 const raw=(n,ct=2,lv=6)=>({ci:id(n),na:'Card '+n,ca:ct===1?1:7,ct,lv,ol:10,te:'assbsfcrhpufs',ra:3,fi:8,gr:[5]});
 const card=(n,kind='assist',level=6)=>({id:id(n),kind,level,owned:true});
@@ -116,7 +116,7 @@ test('category tabs default to all and combine with the other filters',()=>{
  const f=emptyFilter();assert.equal(f.categoryTab,'all');assert.equal(filterCards([a,b],f,2).length,2);
  f.categoryTab='assist:7';assert.deepEqual(filterCards([a,b],f,2).map(c=>c.id),[id(1)]);
  f.q='different';assert.equal(filterCards([a,b],f,2).length,0);
- assert.equal(categoryKey({kind:'mskill',category:1}),'mskill');assert.equal(categoryKey({kind:'skill',category:1}),'skill:1');assert.equal(categoryKey({kind:'soul',category:11}),'soul');
+ assert.equal(categoryKey({kind:'mskill',category:1}),'mskill');assert.equal(categoryKey({kind:'skill',category:1}),'skill');assert.equal(categoryKey({kind:'soul',category:11}),'soul');
 });
 test('unknown levels and master skills have explicit separate groups',()=>{
  const a={kind:'assist',level:undefined,rank:1},m={kind:'mskill',level:0};
@@ -182,4 +182,68 @@ test('published copy code, drag link and executable source are identical',()=>{
  const version=read('wonder-deck.js').match(/const VERSION\s*=\s*'([^']+)'/)[1];
  assert.ok(html.includes('v'+version));
  assert.ok(executable.includes("'"+version+"'"));
+});
+
+test('equipped recommendations hydrate missing rarity from official detail, with bounded cached requests',async()=>{
+ const {engine:e,api,decks}=harness();const requested=[];
+ const details=new Map([[id(2),{...raw(2,1),ca:1}],[id(3),raw(3,8)],[id(4),raw(4)],[id(5),raw(5)],[id(6),{...raw(6,3),ca:11}],[id(7),raw(7,8)],[id(8),raw(8)]]);
+ for(const [ci,r]of details)e.catalog.set(ci,normalizeCard({...r,ra:[id(2),id(8)].includes(ci)?r.ra:undefined},'deck'));
+ decks['2'].ARANK=[{ci:id(4),ct:2,ha:true,na:'Owned weapon'}];decks['2'].ASRANK=[{ci:id(6),ct:3,ha:true,na:'Owned soul'}];decks['2'].MRANK=[{ci:id(3),ct:8,ha:true,na:'Owned master'}];
+ api.candidates=async(cast,s)=>{requested.push(s.type);const cur=slotsOf(decks[cast]).find(x=>x.type===s.type&&x.slot===s.slot);return {setcast:{id:cast},setcard:details.get(cur.id),card:s.type==='assist'?[details.get(id(5))]:s.type==='reserve'?[details.get(id(8))]:[]};};
+ await e.changeCast('2',slot('reserve',7));
+ assert.deepEqual(requested,['reserve','assist','soul','mskill']);
+ for(const ci of [id(4),id(6),id(3)]){const c=e.cards.find(c=>c.id===ci);assert.equal(c.rarity,3);assert.equal(c.owned,true);assert.equal(unavailableReason(c),'');assert.equal(c.viewOnly,true);}
+ await e.chooseSlot(slot('reserve',7));assert.equal(requested.length,5);
+});
+test('equipment stars exclude self and reserve; show ordered multiple rarity conditions',()=>{
+ const subject={...normalizeCard(raw(4),'deck'),effect:'このカード以外にレアリティがWRのアシストカードが１枚以上発動している場合bsこのカード以外にレアリティがWRのアシストカードが２枚以上発動している場合'};
+ const deck=makeDeck(),cat=new Map([[id(4),subject],[id(5),{...card(5),rarity:4}],[id(6),{...card(6,'soul'),rarity:3}],[id(7),{...card(7),rarity:4}]]);
+ assert.equal(equipmentConditions(subject).length,2);assert.equal(equipmentStars(subject,deck,cat).stars,'★☆');
+ cat.get(id(6)).rarity=4;assert.equal(equipmentStars(subject,deck,cat).stars,'★★');
+ cat.get(id(5)).rarity=3;cat.get(id(6)).rarity=3;subject.rarity=4;assert.equal(equipmentStars(subject,deck,cat).stars,'☆☆');
+});
+test('SR non-soul condition excludes soul and remains unknown for missing rarity',()=>{
+ const c={...card(4),effect:'このカード以外にレアリティがSRのカテゴリがソウルではないアシストカードが１枚以上発動している場合'};
+ const deck=makeDeck(),cat=new Map([[id(4),{...c,rarity:3}],[id(5),{...card(5),rarity:4}],[id(6),{...card(6,'soul'),rarity:3}]]);
+ assert.equal(equipmentStars(c,deck,cat).stars,'☆');cat.get(id(5)).rarity=3;assert.equal(equipmentStars(c,deck,cat).stars,'★');
+ delete cat.get(id(5)).rarity;assert.equal(equipmentStars(c,deck,cat).stars,'？');
+});
+test('category-count and unsupported equipment conditions are not falsely marked active',()=>{
+ const c={...card(4,'soul'),effect:'このカード以外にカテゴリが武器のアシストカードが２枚以上発動している場合'};
+ const deck=makeDeck(),cat=new Map([[id(4),c],[id(5),{...card(5),category:7}],[id(6),{...card(6,'soul'),category:11}]]);
+ assert.equal(equipmentStars(c,deck,cat).stars,'☆');
+ const unknown={...c,effect:'このカード以外に使用可能レベルが６以上のアシストカードが１枚以上発動している場合'};
+ assert.equal(equipmentStars(unknown,deck,cat).stars,'？');
+ assert.equal(equipmentStars({...c,effect:'敵を撃破した場合、攻撃力が上がる'},deck,cat).stars,'');
+});
+test('all normal skill subcategories share a single category tab',()=>{
+ const list=[1,2,3,4,5].map(n=>normalizeCard({...raw(n,1),ca:n},'deck'));
+ const f=emptyFilter();f.categoryTab='skill';assert.equal(filterCards(list,f,'2').length,5);
+ assert.deepEqual([...new Set(list.map(categoryKey))],['skill']);
+});
+
+test('late metadata hydration cannot contaminate the new cast or candidate view',async()=>{
+ const {engine:e,api}=harness();const original=api.candidates;let release,started;
+ const ready=new Promise(r=>started=r);
+ api.candidates=async(cast,s)=>{
+  if(cast==='2' && s.type==='soul'){started();return new Promise(r=>release=()=>r({setcast:{id:2},setcard:{...raw(991,3),ca:11},card:[]}));}
+  return original(cast,s);
+ };
+ const previous=e.changeCast('2',slot('assist',4));await ready;
+ await e.changeCast('36',slot('assist',4));release();await previous;
+ assert.equal(e.cast,'36');assert.equal(e.catalog.has(id(991)),false);assert.equal(e.current.id,id(36));assert.equal(e.loading,false);
+});
+
+test('assist and soul without an equipment activation condition never get stars',()=>{
+ const deck=makeDeck(),cat=new Map();
+ const effects=['','assstibs〔fcr特殊fs〕fcr▲一定時間経過するたびにストレート攻撃力とドロー攻撃力が上がるfs',
+ '〔fcrロール固有fs〕fcr▲経験値獲得範囲が拡大し敵に攻撃する度に攻撃力が一定値まで上がるbsfs〔fcrロール固有fs〕fcr▲敵に一定回数攻撃するとＭＰ回復速度が上がるfsbs※ロール固有はサポーターのみ適用bs【ソウル】巨人召喚fcr貫通岩fs',
+ 'このカード以外のアシストカードの効果を強化する。敵を撃破した場合、スピードが上がる。'];
+ for(const kind of ['assist','soul'])for(const effect of effects){const c={...card(4,kind),effect};assert.deepEqual(equipmentConditions(c),[]);assert.deepEqual(equipmentStars(c,deck,cat),{stars:'',title:''});}
+});
+
+test('an unsupported second equipment condition is retained instead of claiming all effects are enabled',()=>{
+ const c={...card(4),effect:'このカード以外にレアリティがSRのアシストカードが１枚以上発動している場合攻撃力が上がる。bsマスタースキルの残り使用回数が０回の場合速度が上がる。'};
+ const cat=new Map([[id(5),{...card(5),rarity:3}],[id(6),{...card(6,'soul'),rarity:3}]]);
+ assert.equal(equipmentStars(c,makeDeck(),cat).stars,'★？');
 });
