@@ -21,6 +21,12 @@ Wonder.NETにログインし、カード編集画面で登録したブックマ�
 
 PC版Chromeで実サイトの連続編集を確認しています。スマホ幅に対応していますが、iPhone Safari実機での起動・保存は未確認です。
 
+## 利用画面
+
+![左にデッキ、中央にカード一覧、右に効果を表示するPC画面](outputs/assets/deck-desktop.webp)
+
+PC版Chromeでの表示例（v1.1.2）。カード画像・ゲームデータ ©SEGA。
+
 ## 開発
 
 Node.js 18以降で実行できます。標準機能だけを使うため、依存パッケージのインストールは不要です。
@@ -36,10 +42,11 @@ node --test outputs/wonder-deck.test.cjs
 
 ## 公開するには（管理者向け）
 
-1. このリポジトリをGitHubへpushします。
-2. GitHubの Settings → Pages → Build and deployment → Source を **GitHub Actions** にします。
-3. Actionsの **Publish installation page** を実行します。以降は `main` の配布ファイル更新時に自動公開します。
-4. `https://satokoyo.github.io/wlw/` でコピー・登録手順を確認します。
+1. GitHub Pagesを利用できる公開範囲・プランであることを確認します。現在の非公開リポジトリでは設定画面に「Upgrade or make this repository public to enable Pages」と表示され、Pagesは利用できません。公開リポジトリに変更するか、非公開リポジトリのPagesに対応するプランが必要です。
+2. このリポジトリをGitHubへpushします。
+3. GitHubの Settings → Pages → Build and deployment → Source を **GitHub Actions** にします。
+4. Actionsの **Publish installation page** を実行します。以降は `main` の配布ファイル更新時に自動公開します。
+5. `https://satokoyo.github.io/wlw/` でコピー・登録手順を確認します。
 
 ワークフローはコミット済みの導入HTML・1行コード・ソースだけを配信します。テスト用データやローカル作業フォルダは配信しません。ページ側でカード情報やアカウント情報を取得する処理もありません。
 
@@ -58,4 +65,4 @@ node --test outputs/wonder-deck.test.cjs
 - `outputs/README.md`：利用手順と動作仕様
 - `outputs/verification.md`：検証記録
 
-非公式の補助ツールです。カード画像・ゲームデータは ©SEGA に帰属し、このリポジトリには同梱していません。
+非公式の補助ツールです。カード画像・ゲームデータは ©SEGA に帰属し、利用画面のキャプチャに含まれます。カード画像の素材集は同梱していません。
