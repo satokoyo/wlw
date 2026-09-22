@@ -2,7 +2,7 @@ name: Publish installation page
 on:
   push:
     branches: [main]
-    paths: ['outputs/**', '.github/workflows/pages.yml']
+    paths: ['src/**', 'tests/**', 'scripts/**', 'site/**', 'dist/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,16 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Test
-        run: node --test outputs/wonder-deck.test.cjs
+        run: node --test tests/wonder-deck.test.cjs
       - uses: actions/configure-pages@v5
-      - name: Prepare public files
-        run: |
-          mkdir _site
-          cp outputs/install.html _site/index.html
-          cp outputs/wonder-deck.bookmarklet.txt outputs/wonder-deck.js _site/
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: _site
+          path: dist
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
