@@ -4,7 +4,7 @@
 /* Wonder Deck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.1.2';
+  const VERSION = '1.2.0';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
@@ -53,6 +53,39 @@
     c.search = norm(c.name + ' ' + effectText(c.effect) + ' ' + c.peculiar.map(r => r.na).join(' '));
     return c;
   }
+  // Reference data is deliberately independent of official eligibility / save state.
+  const STAT_LABELS = {ss:'SS',ds:'DS',skill:'スキル'};
+  const referenceName = name => norm(name).replace(/\s/g,'');
+  function referenceIndex(data) {
+    if(data?.schemaVersion!==1 || !Array.isArray(data.cards))throw Error('参考値データの形式が異なります');
+    const index=new Map();
+    for(const row of data.cards){
+      if(!['assist','soul'].includes(row.kind)||typeof row.name!=='string')throw Error('参考カードの形式が異なります');
+      for(const [stat,v] of Object.entries(row.stats || {})){
+        if(!STAT_LABELS[stat] || !v || !['base','active'].every(k=>v[k]===null || (typeof v[k]==='number' && Number.isFinite(v[k]) && Math.abs(v[k])<=1000)))throw Error('参考値が不正です');
+      }
+      const key=row.kind+':'+referenceName(row.name);
+      // A collision must never silently select another card.
+      index.set(key,index.has(key)?null:row);
+    }
+    return index;
+  }
+  function referenceFor(card,index){return card && index.get(card.kind+':'+referenceName(card.name));}
+  function referenceTotals(slots,catalog,index,level=8,active=false){
+    const result=Object.fromEntries(Object.keys(STAT_LABELS).map(k=>[k,{value:0,known:0,unknown:0}]));
+    for(const slot of slots){
+      if(!slot.id || !['assist','soul'].includes(slot.type))continue;
+      const card=catalog.get(slot.id),row=referenceFor(card,index);
+      if(Number.isFinite(card?.level) && card.level>level)continue;
+      for(const stat of Object.keys(result)){
+        const entry=row?.stats?.[stat],value=entry && (active?entry.active:entry.base);
+        if(!Number.isFinite(card?.level)||!Number.isFinite(value)){result[stat].unknown++;continue;}
+        result[stat].value+=value;result[stat].known++;
+      }
+    }
+    return result;
+  }
+
   function slotsOf(deck) {
     return GROUPS.flatMap(group => (deck[group] || []).map(r => ({type:group === 'master' ? 'mskill' : group,
       slot:Number(r.sl), id:validID(r.ci) ? r.ci : null, overlap:r.lv, kind:TYPES[Number(r.ct)],
@@ -288,7 +321,7 @@
     }
     dispose(){if(this.locked)return false;this.disposed=true;this.epoch++;return true;}
   }
-  if(typeof module==='object' && module.exports){module.exports={equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
+  if(typeof module==='object' && module.exports){module.exports={referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
   if(location.origin!=='https://wonderland-wars.net' || !/^\/deck\/(index|deckchange)\.html$/.test(location.pathname)){alert('Wonder.NETのカード編集画面で実行してください。');return;}
   let resume=null;
   if(window.__wonderDeck){
@@ -338,6 +371,7 @@
 @media(max-width:700px){.top{padding:8px 12px;gap:5px}.brand{font-size:11px;gap:4px}.brand img{width:110px}.top button{padding:8px;font-size:12px}.top .version,.top .spacer{display:none}.top{display:grid;grid-template-columns:minmax(0,1fr) auto auto}.top .brand{grid-column:1/3}.top [data-action=close]{grid-column:3;grid-row:1}.top #cast-current{grid-column:1/3;grid-row:2;margin:0;text-align:left}.top [data-action=reload]{grid-column:3;grid-row:2}.status{padding:6px 12px;font-size:11px}.mobile-nav{display:flex;gap:8px;padding:5px 12px;background:#eae2d2}.mobile-nav button{flex:1}.mobile-nav button.active{background:#d1e8e2;border-color:#078796}.layout{display:block;position:relative;width:100%;margin:0;border:0;box-shadow:none}.pane{height:100%;padding:12px}.deck{display:none}.shell[data-tab=deck] .deck{display:block}.shell[data-tab=deck] .catalog{display:none}.slot img{width:38px;height:54px}.slot b{font-size:11px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.card{padding:0}.card b{font-size:10px}.detail.open{top:8%;bottom:0;width:100%;height:92%;border-radius:16px 16px 0 0;padding:18px;padding-bottom:env(safe-area-inset-bottom,16px);background:#faf6ee}.detail .portrait{width:120px}.detail-title h2{font-size:17px}.actions{bottom:-18px;padding-bottom:max(16px,env(safe-area-inset-bottom))}.filter-row strong{width:100%}}
 @media(max-height:650px) and (min-width:701px){.deck .slot img{width:29px;height:41px}.deck .slot{padding:3px 2px}.deck .section{padding:2px 1px}.deck-row{margin-bottom:5px}}
 .detail{display:flex;flex-direction:column;overflow:hidden}.detail-title{flex:none;align-items:flex-start;margin-bottom:8px}.detail-title h2{font-size:16px;line-height:1.45}.detail-summary{display:flex;align-items:flex-start;gap:8px;flex:none;margin-bottom:7px}.detail .portrait{width:32px;height:45px;max-height:45px;object-fit:contain;margin:0;flex:none}.detail .data{margin:0;gap:4px}.detail .data span{padding:2px 5px;font-size:10px}.detail-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding-right:3px}.detail-body .muted{font-size:11px;line-height:1.5}.detail .effect{font-size:13px;line-height:1.65;margin:8px 0}.detail .actions{position:static;flex:none;padding:8px 0 0;margin-top:8px;gap:6px;border-top:1px solid #ccbea4;background:#faf6ee}.detail .reason{font-size:11px}.detail .actions button{padding:8px 10px}@media(max-width:1080px){.detail{display:none}.detail.open{display:flex}}@media(max-width:700px){.detail .actions{padding-bottom:max(8px,env(safe-area-inset-bottom))}}
+.reference{font-size:11px;line-height:1.55;margin:8px 0;padding:8px;background:#f5eddd;border:1px solid #b9a887;border-radius:6px;color:#393024}.reference p{margin:5px 0}.reference a{color:#086777}.reference label{display:block;margin:4px 0}.reference summary{cursor:pointer}.card .card-caption{height:122px;min-height:122px;grid-template-rows:43px 12px 12px 12px 24px}.card .ref-line{font-size:9px;line-height:12px;height:24px;overflow:hidden;white-space:normal}
 </style><div class="shell" data-tab="deck"><header class="top"><div class="brand"><img src="/common/images/bg_header.jpg" alt="Wonder.NET"><span>カード編集 拡張</span></div><small class="version">${VERSION}</small><button data-action="casts" id="cast-current">読み込み中…</button><div class="spacer"></div><button data-action="reload">再読込</button><button data-action="close">閉じる</button></header><div id="status" class="status" role="status" aria-live="polite">カード情報を読み込み中…</div><nav class="mobile-nav"><button data-action="tab" data-value="deck" class="active">デッキ</button><button data-action="tab" data-value="catalog">カード一覧</button></nav><main class="layout"><section class="pane deck" aria-label="現在のデッキ"></section><section class="pane catalog" aria-label="カード一覧"><h2 id="target">編集する枠を選択</h2><div class="toolbar"><input type="search" id="search" placeholder="カード名・効果を検索" aria-label="カード名・効果を検索"></div><nav id="category-tabs" class="category-tabs" role="tablist" aria-label="カードカテゴリ"></nav><div class="toolbar"><label><input type="checkbox" data-filter="recommended">おすすめ限定</label><small>Lv.昇順 → レアリティ降順</small><button data-action="clear">全解除</button></div><details class="filters"><summary>絞り込み条件</summary><div id="filter-controls"></div></details><div class="conditions" id="conditions"></div><div class="toolbar"><strong id="count">0枚</strong><small>カードを選ぶと効果を表示</small></div><section id="recommendations" aria-label="おすすめカード" hidden><h3 class="group-heading">おすすめ</h3><div class="grid" id="recommend-grid"></div></section><h3 class="group-heading other">カード一覧</h3><div class="grid" id="card-grid"></div><button class="more" data-action="more">さらに表示</button></section><div class="detail-backdrop" data-action="detail-close"></div><aside class="pane detail" aria-label="カード詳細"></aside></main><div class="cast-picker" hidden><div class="toolbar"><strong>キャストを選択</strong><button data-action="casts-close">閉じる</button></div><div class="cast-grid"></div></div></div>`;
   const $=s=>root.querySelector(s), $$=s=>[...root.querySelectorAll(s)];
   let engine, filter=emptyFilter(), visible=48, castList=[], catalog=new Map(), lastSlot='', lastCast='', observer, booting=false;
@@ -351,13 +385,50 @@
     const row=(key,title,values)=>`<div class="filter-row"><strong>${title}</strong>${Object.entries(values).map(([v,t])=>`<label class="check"><input type="checkbox" data-filter="${key}" value="${v}">${esc(t)}</label>`).join('')}</div>`;
     $('#filter-controls').innerHTML=row('kind','カード種別',{skill:'通常スキル',mskill:'マスタースキル',assist:'アシスト',soul:'ソウル'})+row('level','使用レベル',{1:1,2:2,3:3,4:4,5:5,6:6,7:7})+row('rarity','レアリティ',RARITY)+row('effects','上昇能力',EFFECTS)+`<div class="filter-row"><strong>能力の条件</strong><select id="effect-mode" aria-label="上昇能力の条件"><option value="all">すべて含む</option><option value="any">いずれか含む</option></select></div>`+row('versions','バージョン等',VERSIONS)+`<div class="filter-row"><label class="check"><input type="checkbox" data-filter="proper">選択キャストの専用アシスト</label></div>`;
   }
+  let referenceData=null, referenceMap=new Map(), referenceState='読込中', referenceLevel=8, referenceActive=false;
+  const refNumber=n=>(n>=0?'+':'')+Number(n.toFixed(2));
+  function referenceLine(c){
+    if(!['assist','soul'].includes(c.kind))return '';
+    const row=referenceFor(c,referenceMap);
+    if(!row)return referenceState==='取得済み'?'参考値 未収録':'参考値 '+referenceState;
+    return Object.entries(STAT_LABELS).map(([key,label])=>{
+      const v=row.stats[key],n=v && (referenceActive?v.active:v.base);
+      return label+(Number.isFinite(n)?refNumber(n)+(key==='ss'?'':'%'):'?');
+    }).join(' / ');
+  }
+  function referenceDetail(c){
+    if(!['assist','soul'].includes(c.kind))return '';
+    const row=referenceFor(c,referenceMap);
+    return `<section class="reference"><strong>ステータス参考値（Wiki掲載値）</strong><p>現在の強化値には未補正。実際の威力ではありません。</p>${row?Object.entries(STAT_LABELS).map(([key,label])=>{
+      const v=row.stats[key],unit=key==='ss'?'（Wiki単位）':'%';
+      return `<p><b>${label}</b> 通常 ${Number.isFinite(v?.base)?refNumber(v.base)+unit:'不明'} ／ 特殊込み ${Number.isFinite(v?.active)?refNumber(v.active)+unit:'不明'}${v?`<br>${esc(v.note || '追加条件の記載なし')} · <a href="${referenceData.sources[v.source]}" target="_blank" rel="noopener noreferrer">出典</a>`:''}</p>`;
+    }).join(''):`<p>${esc(referenceState==='取得済み'?'このカードは未収録です。':referenceState)}</p>`}<p>確認日 ${esc(referenceData?.reviewedAt || '—')}。未収録・未判明は0扱いしません。</p></section>`;
+  }
+  function referenceDeck(e){
+    const values=referenceTotals(e.slots,catalog,referenceMap,referenceLevel,referenceActive);
+    return `<section class="reference"><strong>装備の掲載値小計（参考）</strong><p>強化値未補正・未収録の増減あり</p><div>${Object.entries(values).map(([k,v])=>`${STAT_LABELS[k]} ${v.known?refNumber(v.value)+(k==='ss'?'':'%'):'—'} <small>不明${v.unknown}枚</small>`).join('<br>')}</div><details><summary>計算条件・注意</summary><label>想定Lv <select id="reference-level">${Array.from({length:8},(_,i)=>`<option ${referenceLevel===i+1?'selected':''}>${i+1}</option>`).join('')}</select></label><label><input id="reference-active" type="checkbox" ${referenceActive?'checked':''}>特殊効果の発動を仮定</label><p>Wiki掲載値の比較用。強化値未補正。${referenceActive?'各条件を満たすと仮定した値で、同時発動を保証しません。':'通常値が判明している項目だけを集計。'}リザーブ・キャスト基礎値・バフ・未収録の増減は含みません。SSはWiki単位、DS・スキルは%。</p><p>${esc(referenceState)} · ${esc(referenceData?.reviewedAt || '')}</p></details></section>`;
+  }
+  async function loadReference(){
+    const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
+    try{
+      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.2.0.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+      if(!response.ok)throw Error('HTTP '+response.status);
+      const data=await response.json(),index=referenceIndex(data);
+      // Only fixed, reviewed source links may be rendered.
+      for(const page of [939,778,788])if(data.sources?.[page]!==`https://w.atwiki.jp/wlws/pages/${page}.html`)throw Error('出典が不正です');
+      if(!host.isConnected)return;
+      referenceData=data;referenceMap=index;referenceState='取得済み';
+    }catch(err){referenceState='取得できません（カード編集は利用できます）';}
+    finally{clearTimeout(timer);aborts.delete(ctl);if(host.isConnected){deckRenderKey='';listRef=null;render();}}
+  }
+
   function renderDeck(e,busy){
     const group=(type,label,cls='')=>`<section class="deck-group ${cls}" aria-label="${label}"><h3 class="section">${label}</h3><div class="slot-grid">${e.slots.filter(s=>s.type===type && !(s.type==='skill' && s.slot===0)).map(s=>{
       const c=catalog.get(s.id) || e.rankings.find(c=>c.id===s.id) || {id:s.id,name:s.id?'名称未取得':'未設定',kind:s.kind};
       const condition=['assist','soul'].includes(s.type)?equipmentStars(c,e.deck,catalog):{stars:'',title:''};
       return `<button class="slot ${sameSlot(s,e.slot)?'active':''}" data-action="slot" data-value="${slotKey(s)}" title="${esc(slotLabel(s)+'：'+c.name+(condition.title?'\n'+condition.title:''))}" aria-label="${esc(slotLabel(s)+'：'+c.name+(condition.title?' '+condition.title:''))}" ${busy?'disabled':''}>${s.id?`<img src="${img(c)}" alt="">`:'<span class="empty-slot">空き</span>'}${s.type==='assist' && s.slot===9?'<span class="restriction">6+</span>':''}<b>${condition.stars?`<span class="condition-stars">${condition.stars}</span>`:''}${esc(c.name)}</b></button>`;
     }).join('')}</div></section>`;
-    $('.deck').innerHTML='<div class="deck-row">'+group('skill','スキル')+group('mskill','マスター','single')+'</div><div class="deck-row equipment">'+group('assist','アシスト')+group('soul','ソウル','single')+'</div>'+group('reserve','リザーブ','reserve')+'<p class="foot">★装備条件成立／☆不足／？未判定<br>各カードの使用可能Lv到達時の構成判定<br>カード画像・データ ©SEGA</p>';
+    $('.deck').innerHTML='<div class="deck-row">'+group('skill','スキル')+group('mskill','マスター','single')+'</div><div class="deck-row equipment">'+group('assist','アシスト')+group('soul','ソウル','single')+'</div>'+group('reserve','リザーブ','reserve')+referenceDeck(e)+'<p class="foot">★装備条件成立／☆不足／？未判定<br>各カードの使用可能Lv到達時の構成判定<br>カード画像・データ ©SEGA</p>';
   }
   function renderCategoryTabs(){
     const keys=[...new Set(engine.cards.map(categoryKey))].sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
@@ -376,7 +447,7 @@
     $('#cast-current').disabled=busy;$$('[data-action=reload],[data-action=close]').forEach(b=>b.disabled=busy);
     message((e.error?e.error+' ｜ ':'')+e.status,!!e.error);
     if(e.uncertain){const b=document.createElement('button');b.textContent='保存結果を再照合';b.dataset.action='reconcile';b.disabled=e.pending;b.className='reconcile';$('#status').append(' ',b);}
-    const deckKey=e.deck?deckSignature(e.deck)+'|'+(e.slot?slotKey(e.slot):'')+'|'+busy+'|'+e.loading:'';
+    const deckKey=e.deck?deckSignature(e.deck)+'|'+e.cast+'|'+(e.slot?slotKey(e.slot):'')+'|'+busy+'|'+e.loading:'';
     if(e.deck && deckKey!==deckRenderKey){
       deckRenderKey=deckKey;
       renderDeck(e,busy);
@@ -391,7 +462,7 @@
     const unavailable=unavailableReason(c);
     const state=!c.owned?'未所持':unavailable?'情報未取得':c.equipped?'他枠に装備中':c.viewOnly?'閲覧用':'';
     const stats=[c.kind!=='mskill' && c.level?'Lv.'+c.level:'',RARITY[c.rarity]||'',c.owned?overlap(c):''].filter(Boolean).join(' · ');
-    return `<button class="card ${e.selected?.id===c.id?'selected':''} ${unavailable?'unowned':''}" data-action="card" data-value="${c.id}" aria-label="${esc(c.name)}${unavailable?'（'+esc(unavailable)+'）':'の詳細'}" title="${esc(unavailable || c.name+' / '+cardCategoryText(c)+' / '+stats)}" ${unavailable?'disabled':''}>${c.rank?`<span class="rank">おすすめ ${c.rank}</span>`:''}<span class="card-art"><img loading="lazy" decoding="async" src="${img(c)}" alt=""></span><span class="card-caption"><b>${esc(c.name)}</b><span class="meta category">${esc(cardCategoryText(c))}</span><span class="meta">${esc(stats)}</span><span class="meta card-state">${state}</span></span></button>`;
+    return `<button class="card ${e.selected?.id===c.id?'selected':''} ${unavailable?'unowned':''}" data-action="card" data-value="${c.id}" aria-label="${esc(c.name)}${unavailable?'（'+esc(unavailable)+'）':'の詳細'}" title="${esc(unavailable || c.name+' / '+cardCategoryText(c)+' / '+stats)}" ${unavailable?'disabled':''}>${c.rank?`<span class="rank">おすすめ ${c.rank}</span>`:''}<span class="card-art"><img loading="lazy" decoding="async" src="${img(c)}" alt=""></span><span class="card-caption"><b>${esc(c.name)}</b><span class="meta category">${esc(cardCategoryText(c))}</span><span class="meta">${esc(stats)}</span><span class="meta card-state">${state}</span><span class="meta ref-line">${esc(referenceLine(c))}</span></span></button>`;
   }
   function renderCards(){
     if(!engine)return;
@@ -423,7 +494,7 @@
     if(!c){detail.innerHTML='<div class="detail-title"><h2>カードの効果</h2><button data-action="detail-close">閉じる</button></div><div class="empty">デッキの枠、または一覧のカードを選んでください。</div>';return;}
     const why=e.reason(c), current=e.current;
     const equipped=e.slots.filter(s=>s.id===c.id).map(slotLabel);
-    detail.innerHTML=`<div class="detail-title"><h2>${esc(c.name)}</h2><button data-action="detail-close">閉じる</button></div><div class="detail-summary"><img class="portrait" src="${img(c)}" alt="${esc(c.name)}"><div class="data"><span>${esc(LABEL[c.kind])}</span>${c.level?`<span>使用可能 Lv.${c.level}</span>`:''}${c.rarity?`<span>${RARITY[c.rarity]||c.rarity}</span>`:''}<span>強化 ${esc(overlap(c))}</span>${c.mp!=null?`<span>MP ${c.mp}</span>`:''}${c.uses!=null?`<span>使用回数 ${c.uses}</span>`:''}${c.first!=null?`<span>初回CT ${c.first}</span>`:''}${c.next!=null?`<span>再使用CT ${c.next}</span>`:''}</div></div><div class="detail-body">${equipped.length?`<p class="muted">装備中：${esc(equipped.join(' ／ '))}</p>`:''}<div class="effect">${effectHTML(c.effect)}</div>${c.peculiar.map(r=>`<p class="muted">固有効果：${esc(r.na)}のみ適用</p>`).join('')}${c.boosts.length?`<p class="muted">強化対象：${esc(c.boosts.join('・'))}</p>`:''}</div><div class="actions"><p class="reason">${esc(why || (c.equipped?'他枠に装備中です。公式の入れ替え処理で構成を更新します。':slotLabel(current)+'にセットします'))}</p><button class="primary" data-action="save" ${why?'disabled':''}>この枠にセット</button>${current?.editable && current.id?`<button data-action="remove" ${e.locked||e.loading?'disabled':''}>この枠のカードをはずす</button>`:''}</div>`;
+    detail.innerHTML=`<div class="detail-title"><h2>${esc(c.name)}</h2><button data-action="detail-close">閉じる</button></div><div class="detail-summary"><img class="portrait" src="${img(c)}" alt="${esc(c.name)}"><div class="data"><span>${esc(LABEL[c.kind])}</span>${c.level?`<span>使用可能 Lv.${c.level}</span>`:''}${c.rarity?`<span>${RARITY[c.rarity]||c.rarity}</span>`:''}<span>強化 ${esc(overlap(c))}</span>${c.mp!=null?`<span>MP ${c.mp}</span>`:''}${c.uses!=null?`<span>使用回数 ${c.uses}</span>`:''}${c.first!=null?`<span>初回CT ${c.first}</span>`:''}${c.next!=null?`<span>再使用CT ${c.next}</span>`:''}</div></div><div class="detail-body">${equipped.length?`<p class="muted">装備中：${esc(equipped.join(' ／ '))}</p>`:''}${referenceDetail(c)}<div class="effect">${effectHTML(c.effect)}</div>${c.peculiar.map(r=>`<p class="muted">固有効果：${esc(r.na)}のみ適用</p>`).join('')}${c.boosts.length?`<p class="muted">強化対象：${esc(c.boosts.join('・'))}</p>`:''}</div><div class="actions"><p class="reason">${esc(why || (c.equipped?'他枠に装備中です。公式の入れ替え処理で構成を更新します。':slotLabel(current)+'にセットします'))}</p><button class="primary" data-action="save" ${why?'disabled':''}>この枠にセット</button>${current?.editable && current.id?`<button data-action="remove" ${e.locked||e.loading?'disabled':''}>この枠のカードをはずす</button>`:''}</div>`;
   }
   function chooseCard(id){if(!engine || engine.loading)return;const c=engine.cards.find(c=>c.id===id);if(unavailableReason(c))return;engine.selected=c;renderDetail();$$('.card').forEach(b=>b.classList.toggle('selected',b.dataset.value===id));$('.detail').classList.add('open');$('.detail-backdrop').classList.add('open');$('.detail').scrollTop=0;}
   function close(){
@@ -461,6 +532,7 @@
   });
   root.addEventListener('input',ev=>{if(ev.target.id==='search'){filter.q=ev.target.value;clearTimeout(searchTimer);searchTimer=setTimeout(()=>{visible=48;renderCards();},150);}});
   root.addEventListener('change',ev=>{
+    if(ev.target.id==='reference-level'||ev.target.id==='reference-active'){if(ev.target.id==='reference-level')referenceLevel=Number(ev.target.value);else referenceActive=ev.target.checked;deckRenderKey='';listRef=null;render();$('.reference details')?.setAttribute('open','');return;}
     const el=ev.target,key=el.dataset.filter;
     if(key){if(Array.isArray(filter[key]))filter[key]=$$('[data-filter='+key+']:checked').map(e=>e.value);else filter[key]=el.checked;}
     if(el.id==='effect-mode')filter.effectMode=el.value;
@@ -492,4 +564,5 @@
     }catch(e){message(e.message,true);}finally{booting=false;}
   }
   boot();
+  loadReference();
 })();

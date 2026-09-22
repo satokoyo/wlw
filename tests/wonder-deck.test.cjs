@@ -179,7 +179,7 @@ test('published copy code, drag link and executable source are identical',()=>{
  assert.equal(decodeHTML(html.match(/<a\b[^>]*id="bookmark"[^>]*href="([^"]+)"/)[1]),bookmark);
  assert.equal(bookmark.split('\n').length,1);
  assert.ok(bookmark.startsWith('javascript:'));
- const executable=decodeURIComponent(bookmark.slice(11));
+ const executable=decodeURIComponent(read('wonder-deck.standalone.txt').trim().slice(11));
  assert.equal(executable,read('wonder-deck.min.js'));
  assert.doesNotThrow(()=>new vm.Script(executable));
  const version=read('wonder-deck.js').match(/const VERSION\s*=\s*'([^']+)'/)[1];
@@ -257,6 +257,9 @@ test('an unsupported second equipment condition is retained instead of claiming 
  const license=read('LICENSE');
  assert.equal(read('dist/LICENSE'),license);
  assert.ok(read('dist/wonder-deck.min.js').startsWith('/*!\n'+license+'*/\n'));
- assert.ok(decodeURIComponent(read('dist/wonder-deck.bookmarklet.txt').trim().slice(11)).includes(license));
+ assert.ok(decodeURIComponent(read('dist/wonder-deck.standalone.txt').trim().slice(11)).includes(license));
  assert.ok(read('dist/index.html').includes('href="LICENSE"'));
 });
+
+// Keep the published CI entry point covering the loader and reference dataset.
+require('./reference-cases.cjs');

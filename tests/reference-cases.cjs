@@ -1,0 +1,52 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
+const {referenceIndex,referenceFor,referenceTotals}=require('../src/wonder-deck.js');
+const root=path.join(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const data=JSON.parse(read('data/reference-stats.json'));
+test('reference data validates; all reviewed entries have fixed public source and finite values or null',()=>{
+ const index=referenceIndex(data);assert.equal(index.size,data.cards.length);
+ assert.ok(data.cards.length>=180);
+ for(const row of data.cards){assert.ok(referenceFor(row,index));for(const v of Object.values(row.stats)){assert.ok([939,778,788].includes(v.source));assert.equal(v.strength,'unspecified');}}
+ assert.equal(read('data/reference-stats.json'),read('dist/reference-stats-1.2.0.json'));
+});
+test('exact name binding normalizes widths and whitespace, separates kinds and refuses ambiguity',()=>{
+ const index=referenceIndex(data);
+ assert.ok(referenceFor({name:'戦隊頭目　ゼクス',kind:'soul'},index));
+ assert.equal(referenceFor({name:'戦隊頭目 ゼクス',kind:'assist'},index),undefined);
+ assert.equal(referenceFor({name:'ゼクス',kind:'soul'},index),undefined);
+ const duplicate=referenceIndex({...data,cards:[data.cards[0],data.cards[0]]});
+ assert.equal(referenceFor(data.cards[0],duplicate),null);
+});
+test('totals exclude reserve and inactive levels; missing stats are unknown, never zero',()=>{
+ const index=referenceIndex(data),catalog=new Map([['a',{name:'神光の七星剣',kind:'assist',level:4}],['s',{name:'戦隊頭目 ゼクス',kind:'soul',level:1}]]);
+ const slots=[{id:'a',type:'assist'},{id:'s',type:'soul'},{id:'a',type:'reserve'}];
+ let total=referenceTotals(slots,catalog,index,3,false);assert.equal(total.ss.known,0);assert.equal(total.ss.unknown,1);
+ total=referenceTotals(slots,catalog,index,8,false);assert.equal(total.ds.value,2.8);assert.equal(total.ds.unknown,1);
+ total=referenceTotals(slots,catalog,index,8,true);assert.equal(total.ds.value,20);assert.equal(total.ss.value,7.5);
+ assert.equal(total.skill.value,10);
+});
+test('special inclusive DS values replace base; negative numbers survive and partial data remains unknown',()=>{
+ const row={name:'test',kind:'assist',stats:{ds:{base:10,active:15},ss:{base:-2,active:-4},skill:{base:null,active:null}}};
+ const index=referenceIndex({schemaVersion:1,cards:[row]}),slots=[{type:'assist',id:'x'}],catalog=new Map([['x',{...row,level:1}]]);
+ const result=referenceTotals(slots,catalog,index,8,true);assert.equal(result.ds.value,15);assert.equal(result.ss.value,-4);assert.equal(result.skill.unknown,1);
+ catalog.get('x').level=undefined;assert.equal(referenceTotals(slots,catalog,index).ds.unknown,1);
+});
+test('reference values do not interpolate strengthening or classify unlisted effects as zero',()=>{
+ const index=referenceIndex(data);let values=[];
+ for(const overlap of [0,4,10])values.push(referenceTotals([{type:'assist',id:'x'}],new Map([['x',{name:'神光の七星剣',kind:'assist',level:4,overlap}]]),index).ss.value);
+ assert.deepEqual(values,[1.5,1.5,1.5]);
+ assert.equal(referenceTotals([{type:'assist',id:'x'}],new Map(),index).ss.unknown,1);
+ assert.throws(()=>referenceIndex({schemaVersion:1,cards:[{name:'x',kind:'assist',stats:{ds:{base:'12',active:12}}}]}));
+});
+const code=decodeURIComponent(read('dist/wonder-deck.bookmarklet.txt').trim().slice(11));
+function loader(){let script,timer;const alerts=[];const window={};const context=vm.createContext({window,location:{origin:'https://wonderland-wars.net',pathname:'/deck/index.html'},alert:s=>alerts.push(s),setTimeout:f=>(timer=f,1),clearTimeout(){},document:{createElement:()=>({remove(){}}),head:{append:s=>script=s}}});return {run:()=>vm.runInContext(code,context),window,alerts,get script(){return script},timeout:()=>timer()};}
+test('short loader locks duplicate launches and resets on error/timeout',()=>{
+ const l=loader();l.run();const first=l.script;l.run();assert.equal(l.script,first);assert.equal(l.window.__wonderDeckLoading,true);
+ l.script.onerror();assert.equal(l.window.__wonderDeckLoading,undefined);assert.equal(l.alerts.length,1);l.run();assert.notEqual(l.script,first);l.timeout();assert.equal(l.window.__wonderDeckLoading,undefined);
+});
+test('loader preserves an existing same-version UI and has matching integrity for the versioned script',()=>{
+ const l=loader();let shown=0;l.window.__wonderDeck={version:'1.2.0',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
+ delete l.window.__wonderDeck;l.run();
+ assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.2.0.js');
+ assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.2.0.js')).digest('base64'));
+ assert.equal(l.script.crossOrigin,'anonymous');assert.ok(code.length<1600);
+});

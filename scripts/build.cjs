@@ -16,7 +16,10 @@ if(process.argv[2]){
 }
 const license=fs.readFileSync(path.join(root,'LICENSE'),'utf8');
 compact='/*!\n'+license+'*/\n'+compact;
-const bookmark='javascript:'+encodeURI(compact).replace(/[?#]/g,c=>encodeURIComponent(c));
+const standalone='javascript:'+encodeURI(compact).replace(/[?#]/g,c=>encodeURIComponent(c));
+const integrity='sha384-'+require('node:crypto').createHash('sha384').update(compact).digest('base64');
+const loader=fs.readFileSync(path.join(root,'src/loader.js'),'utf8').replace('{{INTEGRITY}}',integrity).replace(/\n/g,'');
+const bookmark='javascript:'+encodeURI(loader).replace(/[?#]/g,c=>encodeURIComponent(c));
 const escape=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const version=source.match(/const VERSION\s*=\s*'([^']+)'/)[1];
 const screenshot='data:image/webp;base64,'+fs.readFileSync(path.join(root,'site/assets/deck-desktop.webp')).toString('base64');
@@ -27,4 +30,8 @@ fs.writeFileSync(path.join(dist,'wonder-deck.js'),source);
 fs.writeFileSync(path.join(dist,'wonder-deck.min.js'),compact);
 fs.writeFileSync(path.join(dist,'wonder-deck.bookmarklet.txt'),bookmark+'\n');
 fs.writeFileSync(path.join(dist,'index.html'),html);
+fs.writeFileSync(path.join(dist,'wonder-deck-'+version+'.js'),compact);
+fs.writeFileSync(path.join(dist,'wonder-deck.standalone.txt'),standalone+'\n');
+fs.copyFileSync(path.join(root,'data/reference-stats.json'),path.join(dist,'reference-stats-'+version+'.json'));
+fs.copyFileSync(path.join(root,'data/README.md'),path.join(dist,'DATA-NOTICE.txt'));
 console.log(JSON.stringify({sourceBytes:Buffer.byteLength(source),compactBytes:Buffer.byteLength(compact),bookmarkCharacters:bookmark.length}));
