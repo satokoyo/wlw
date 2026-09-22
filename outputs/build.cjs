@@ -9,7 +9,8 @@ if(process.argv[2]){
  try {compact=require(path.resolve(process.argv[2])).babelTransform(source,path.join(__dirname,'wonder-deck.js'),false,[[plugin,{}]],[]).code;}
  finally{fs.unlinkSync(plugin);}
 }
-const bookmark='javascript:'+encodeURIComponent(compact);
+// Keep URI-safe punctuation literal; escape fragment/query delimiters explicitly.
+const bookmark='javascript:'+encodeURI(compact).replace(/[?#]/g,c=>encodeURIComponent(c));
 fs.writeFileSync(path.join(__dirname,'wonder-deck.bookmarklet.txt'),bookmark+'\n');
 fs.writeFileSync(path.join(__dirname,'wonder-deck.min.js'),compact);
 const escape=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -1,8 +1,8 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {Engine,normalizeCard,slotRule,slotsOf,filterCards,emptyFilter,effectText,effectHTML,deckSignature}=require('./wonder-deck.js');
+const {Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('./wonder-deck.js');
 const id=n=>n.toString(16).padStart(32,'0');
-const raw=(n,ct=2,lv=6)=>({ci:id(n),ct,lv,ol:10,te:'assbsfcrhpufs',ra:3,fi:8,gr:[5]});
+const raw=(n,ct=2,lv=6)=>({ci:id(n),na:'Card '+n,ca:ct===1?1:7,ct,lv,ol:10,te:'assbsfcrhpufs',ra:3,fi:8,gr:[5]});
 const card=(n,kind='assist',level=6)=>({id:id(n),kind,level,owned:true});
 const slot=(type,n)=>({type,slot:n,editable:true});
 const makeDeck=()=>({con:'OK',rslt:'OK',skill:[{sl:0,ci:id(1),ct:1,lv:10},{sl:1,ci:id(2),ct:1,lv:10}],master:[{sl:8,ci:id(3),ct:8,lv:10}],assist:[{sl:4,ci:id(4),ct:2,lv:10},{sl:9,ci:id(5),ct:2,lv:10}],soul:[{sl:7,ci:id(6),ct:3,lv:10}],reserve:[{sl:7,ci:id(7),ct:8,lv:10,bs:true}],ARANK:[],ASRANK:[],MRANK:[]});
@@ -38,7 +38,7 @@ test('catalog and deck CT fields are normalized independently',()=>{
  const master=normalizeCard({...raw(8,1),na:'master'},'mskill');assert.equal(master.kind,'mskill');
  const soul=normalizeCard({...raw(9,11),na:'soul'},'assist');assert.equal(soul.kind,'soul');
  const skill=normalizeCard({...raw(10,2),ca:36,na:'skill'},'skill');assert.equal(skill.kind,'skill');assert.equal(skill.category,2);assert.equal(skill.cast,'36');
- const merged=normalizeCard(raw(10,1,3),'deck',new Map([[id(10),skill]]));assert.equal(merged.kind,'skill');assert.equal(merged.name,'skill');assert.equal(merged.level,3);assert.equal(merged.cast,'36');
+ const merged=normalizeCard({...raw(10,1,3),na:undefined},'deck',new Map([[id(10),skill]]));assert.equal(merged.kind,'skill');assert.equal(merged.name,'skill');assert.equal(merged.level,3);assert.equal(merged.cast,'36');
 });
 test('effect decoding preserves meaning and cannot inject markup',()=>{
  assert.match(effectText('assstibsfcrhpufs'),/\n▲最大ＨＰ/);assert.ok(!effectHTML('<img onerror=x>fcrhpufs').includes('<img'));assert.match(effectHTML('fcrhpufs'),/class="up"/);
@@ -107,7 +107,61 @@ test('recommendations follow slot type and level while reserve retains all kinds
  await e.changeCast('2',slot('assist',9));assert.deepEqual(e.cards.filter(c=>c.viewOnly).map(c=>c.name),['high']);
  await e.chooseSlot(slot('reserve',7));assert.equal(e.cards.filter(c=>c.viewOnly).length,4);
 });
-test('recommendations are first by default, preserving official order for non-recommendations',()=>{
- const a={...normalizeCard(raw(1),'deck'),rank:undefined},b={...normalizeCard(raw(2),'deck'),rank:2},c={...normalizeCard(raw(3),'deck'),rank:1},d={...normalizeCard(raw(4),'deck')};
- assert.deepEqual(filterCards([a,b,c,d],emptyFilter(),2).map(c=>c.id),[id(3),id(2),id(1),id(4)]);
+test('ordinary list sorts by level and rarity; recommendations retain official order',()=>{
+ const a=normalizeCard({...raw(1,2,1),ra:3},'deck'),b={...normalizeCard({...raw(2,2,3),ra:4},'deck'),rank:1},c={...normalizeCard({...raw(3,2,1),ra:2},'deck'),rank:3},d={...normalizeCard({...raw(4,2,1),ra:4},'deck'),rank:2},e=normalizeCard({...raw(5,2,1),ra:4},'deck'),f={...e,id:id(6)};
+ const normal=filterCards([a,b,c,d,e,f],emptyFilter(),2);assert.deepEqual(normal.map(c=>c.id),[id(4),id(5),id(6),id(1),id(3),id(2)]);assert.deepEqual(recommendedCards(normal).map(c=>c.id),[id(2),id(4),id(3)]);
+});
+test('category tabs default to all and combine with the other filters',()=>{
+ const a=normalizeCard({...raw(1),ca:7,na:'needle'},'deck'),b=normalizeCard({...raw(2),ca:8,na:'needle'},'deck');
+ const f=emptyFilter();assert.equal(f.categoryTab,'all');assert.equal(filterCards([a,b],f,2).length,2);
+ f.categoryTab='assist:7';assert.deepEqual(filterCards([a,b],f,2).map(c=>c.id),[id(1)]);
+ f.q='different';assert.equal(filterCards([a,b],f,2).length,0);
+ assert.equal(categoryKey({kind:'mskill',category:1}),'mskill');assert.equal(categoryKey({kind:'skill',category:1}),'skill:1');assert.equal(categoryKey({kind:'soul',category:11}),'soul');
+});
+test('unknown levels and master skills have explicit separate groups',()=>{
+ const a={kind:'assist',level:undefined,rank:1},m={kind:'mskill',level:0};
+ assert.equal(levelLabel(a),'使用レベル未取得');assert.equal(levelLabel(m),'マスタースキル（使用レベルなし）');
+ assert.ok(levelOrder(a)>levelOrder(m));assert.ok(levelOrder(m)>levelOrder({kind:'assist',level:7}));
+ assert.equal(cardGroup(a),cardGroup({...a,rank:undefined}));assert.notEqual(cardGroup(m),cardGroup(a));
+});
+test('unowned flags survive joins and explicitly owned data can refresh them',()=>{
+ const unowned=normalizeCard({...raw(1),ha:false},'deck');assert.equal(unowned.owned,false);
+ const cat=new Map([[id(1),unowned]]);assert.equal(normalizeCard(raw(1),'deck',cat).owned,false);
+ assert.equal(normalizeCard({...raw(1),ha:true},'deck',cat).owned,true);
+ for(const ha of [false,0,'0'])assert.equal(normalizeCard({...raw(1),ha},'deck').owned,false);
+});
+test('unowned recommendation absent from catalog and candidates never submits',async()=>{
+ const {engine:e,decks,calls}=harness();const ribbon='b4826387d3176e3c7f202fce7270ad62';
+ decks['2'].ARANK=[{ha:false,na:'おそろいのリボン',ci:ribbon,ct:2,te:'hpufsspu',ve:'New'}];
+ await e.changeCast('2',slot('assist',4));const c=e.cards.find(c=>c.id===ribbon);
+ assert.equal(c.owned,false);assert.equal(c.viewOnly,true);assert.equal(c.level,undefined);assert.match(e.reason(c),/未所持/);
+ assert.equal(await e.save(ribbon),false);assert.equal(calls.length,0);
+});
+test('current recommended card gets level and rarity from the current-slot response',async()=>{
+ const {engine:e,decks}=harness();decks['2'].ARANK=[{ci:id(4),ct:2,ha:true,na:'Current'}];
+ await e.changeCast('2',slot('assist',4));const c=e.cards.find(c=>c.id===id(4));
+ assert.equal(c.level,6);assert.equal(c.rarity,3);assert.equal(c.owned,true);
+});
+test('incomplete metadata is disabled for recommendations and ordinary candidates alike',async()=>{
+ const full=normalizeCard(raw(8),'deck');assert.equal(unavailableReason(full),'');
+ for(const [key,value,label] of [['level',undefined,'使用レベル'],['rarity',undefined,'レアリティ'],['category',NaN,'カテゴリ'],['name','名称未取得','カード名'],['effect','','効果']])assert.match(unavailableReason({...full,[key]:value}),new RegExp(label));
+ assert.equal(unavailableReason({...full,kind:'mskill',level:undefined,category:undefined}),'');
+ const {engine:e,api,calls}=harness();const original=api.candidates;api.candidates=async(...args)=>{const d=await original(...args);d.card[0].lv=null;return d;};
+ await e.changeCast('2',slot('assist',4));assert.match(e.reason(e.cards[0]),/情報未取得/);assert.equal(await e.save(e.cards[0].id),false);assert.equal(calls.length,0);
+});
+test('normal skills stay separate from assists and masters are last in ordinary list',()=>{
+ const make=(n,kind,level)=>({...normalizeCard(raw(n),'deck'),kind,level});
+ const skill=make(1,'skill',5),assist=make(2,'assist',1),unknown=make(3,'assist',undefined),master=make(4,'mskill',0),soul=make(5,'soul',3);
+ const cards=[master,unknown,assist,skill,soul];
+ assert.deepEqual(filterCards(cards,emptyFilter(),2).map(c=>c.id),[id(1),id(2),id(5),id(3),id(4)]);
+ assert.equal(cardGroup(skill),cardGroup({...skill,level:1}));assert.notEqual(cardGroup(skill),cardGroup({...assist,level:5}));assert.equal(levelLabel(skill),'通常スキル');
+ const ranked=cards.map(c=>({...c,rank:1}));assert.deepEqual(filterCards([...cards,...ranked],emptyFilter(),2).map(c=>!!c.rank),[false,true,false,true,false,true,false,true,false,true]);
+});
+test('recommendation order is independent of level, rarity and ordinary ordering',()=>{
+ const a={...normalizeCard(raw(1,2,7),'deck'),rank:1,recommendationOrder:0},b={...normalizeCard(raw(2,3,1),'deck'),rank:1,recommendationOrder:2},c={...normalizeCard(raw(3,2,1),'deck'),rank:2,recommendationOrder:1};
+ const normal=filterCards([a,b,c],emptyFilter(),2),rec=recommendedCards(normal);
+ assert.deepEqual(rec.map(c=>c.id),[id(1),id(3),id(2)]);assert.equal(normal.length,3);assert.ok(rec.every(c=>normal.includes(c)));
+});
+test('card overlay labels include specific category text without confusing card kinds',()=>{
+ assert.equal(cardCategoryText({kind:'assist',category:7}),'武器');assert.equal(cardCategoryText({kind:'skill',category:1}),'スキル・攻撃');assert.equal(cardCategoryText({kind:'mskill',category:1}),'マスタースキル');assert.equal(cardCategoryText({kind:'soul',category:11}),'ソウル');
 });
