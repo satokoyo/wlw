@@ -1,10 +1,10 @@
-# Wonder Deck 1.1.0
+# Wonder Deck 1.1.1
 
 Wonder.NETのカード編集を1画面で行う、単体完結型ブックマークレットです。
 
 ## 導入
 
-同じフォルダの `install.html` をChromeまたはSafariで開いてください。PCでは「Wonder Deck」のリンクをブックマークバーへドラッグします。iPhoneでは登録コードをコピーし、Safariのブックマーク編集画面でURLに貼り付けます。先頭の `javascript:` を含めて全文を登録してください。
+[導入ページ](https://satokoyo.github.io/wlw/)をChromeまたはSafariで開き、「登録コードをコピー」を押してください（GitHub Pages公開後に利用可能）。クローンは不要です。公開前はGitHubの [登録用コード](wonder-deck.bookmarklet.txt) の「Copy raw file」、またはダウンロードした同じフォルダの `install.html` を利用できます。PCでは「Wonder Deck」のリンクをブックマークバーへドラッグします。iPhoneでは登録コードをコピーし、Safariのブックマーク編集画面でURLに貼り付けます。先頭の `javascript:` を含めて全文を登録してください。
 
 登録用コードは `wonder-deck.bookmarklet.txt` にも保存しています。更新時はブックマークのURLを最新コードで置き換え、実行中の拡張画面を「閉じる」で終了してから再実行してください。
 
@@ -14,6 +14,10 @@ Wonder.NETへログインし、次のいずれかの画面で登録したブッ�
 - `/deck/deckchange.html?slot=枠番号&cast=キャストID&type=種別`
 
 ページの再読み込み・別ページへの移動では終了します。その後は再実行してください。カード変更や拡張画面内のキャスト切り替えでは終了しません。
+
+## 表示の更新（1.1.1）
+
+カード一覧は説明欄を同じ高さに統一し、名前・カテゴリ・レベル等・装備状態の位置を揃えました。キャスト画像は公式の2段スプライトの上段だけを表示します。
 
 ## 操作
 

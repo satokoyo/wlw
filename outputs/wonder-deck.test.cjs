@@ -165,3 +165,21 @@ test('recommendation order is independent of level, rarity and ordinary ordering
 test('card overlay labels include specific category text without confusing card kinds',()=>{
  assert.equal(cardCategoryText({kind:'assist',category:7}),'武器');assert.equal(cardCategoryText({kind:'skill',category:1}),'スキル・攻撃');assert.equal(cardCategoryText({kind:'mskill',category:1}),'マスタースキル');assert.equal(cardCategoryText({kind:'soul',category:11}),'ソウル');
 });
+
+test('published copy code, drag link and executable source are identical',()=>{
+ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+ const read=name=>fs.readFileSync(path.join(__dirname,name),'utf8');
+ const bookmark=read('wonder-deck.bookmarklet.txt').trim();
+ const html=read('install.html');
+ const decodeHTML=s=>s.replace(/&(amp|lt|gt|quot|#39);/g,(_,entity)=>({amp:'&',lt:'<',gt:'>',quot:'"','#39':"'"}[entity]));
+ assert.equal(decodeHTML(html.match(/<textarea\b[^>]*id="code"[^>]*>([\s\S]*?)<\/textarea>/)[1]),bookmark);
+ assert.equal(decodeHTML(html.match(/<a\b[^>]*id="bookmark"[^>]*href="([^"]+)"/)[1]),bookmark);
+ assert.equal(bookmark.split('\n').length,1);
+ assert.ok(bookmark.startsWith('javascript:'));
+ const executable=decodeURIComponent(bookmark.slice(11));
+ assert.equal(executable,read('wonder-deck.min.js'));
+ assert.doesNotThrow(()=>new vm.Script(executable));
+ const version=read('wonder-deck.js').match(/const VERSION\s*=\s*'([^']+)'/)[1];
+ assert.ok(html.includes('v'+version));
+ assert.ok(executable.includes("'"+version+"'"));
+});
