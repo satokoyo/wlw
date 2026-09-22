@@ -1,68 +1,73 @@
 # Wonder Deck
 
-Wonder.NET（ワンダーランドウォーズ）のカード編集を1画面で行う、外部JavaScript不要のブックマークレットです。
+Wonder.NET（ワンダーランドウォーズ）のカード編集を1画面で行う、非公式のブックマークレットです。外部JavaScriptや開発環境は不要です。
 
-デッキ・カード一覧・効果を並べて表示し、カードの入れ替えやキャスト切り替え後も編集を続けられます。おすすめを先頭の専用欄に表示し、同じカードを通常一覧にも表示します。カテゴリタブ、レベル・レアリティ順の一覧、未所持・情報不足カードの選択禁止、左カラムの装備条件表示（★／☆／？）、枠ごとの装備制限、装備済みカードの交換、保存前後のデッキ照合に対応しています。
+## 使う
 
-## 導入
+**[導入ページで登録コードをコピー](https://satokoyo.github.io/wlw/)**
 
-**[導入ページを開く → 登録コードをコピー](https://satokoyo.github.io/wlw/)**
+ページ公開前は [登録用コード](dist/wonder-deck.bookmarklet.txt) を開き、GitHubの「Copy raw file」で全文をコピーできます。ダウンロードした `dist/index.html` を直接開く方法も使えます。
 
-クローンや開発環境は不要です。ページの「登録コードをコピー」を押して、Chrome・SafariのブックマークのURLに貼り付けてください。PCではドラッグでの登録もできます。
+1. コピーしたコードをChrome・SafariのブックマークのURLに登録します。
+2. Wonder.NETにログインしてカード編集画面を開きます。
+3. 登録したブックマークを実行します。
 
-> 上記URLはGitHub Pages公開後に利用できます。公開準備中やページが開かない場合は、[登録用コード](outputs/wonder-deck.bookmarklet.txt)を開き、GitHubの「Copy raw file」から全文をコピーしてください。ダウンロード済みの `outputs/install.html` を直接開く方法も使えます。
+![左にデッキ、中央にカード一覧、右に効果を表示するPC画面](site/assets/deck-desktop.webp)
 
-Wonder.NETにログインし、カード編集画面で登録したブックマークを実行します。
+PC版Chromeでの表示例（v1.1.2）。画像・ゲームデータ ©SEGA。
 
-- [使い方・ChromeとSafariの登録手順](outputs/README.md)
-- [登録用1行コード](outputs/wonder-deck.bookmarklet.txt)
-- [検証結果と未確認事項](outputs/verification.md)
-- [CDN検討・表示設計](outputs/design-notes.md)
+- デッキ・おすすめ・検索結果・カード効果をまとめて表示
+- カード変更やキャスト切り替え後も続けて編集
+- 枠の装備制限、装備済みカードの交換、保存前後のサーバー照合
+- 左カラムに、そのカードの対応する装備条件を★／☆／？で表示
 
-PC版Chromeで実サイトの連続編集を確認しています。スマホ幅に対応していますが、iPhone Safari実機での起動・保存は未確認です。
+[使い方](docs/usage.md) · [検証結果と未確認事項](docs/verification.md) · [設計メモ](docs/design-notes.md) · [公開前確認](docs/publication-review.md)
 
-## 利用画面
-
-![左にデッキ、中央にカード一覧、右に効果を表示するPC画面](outputs/assets/deck-desktop.webp)
-
-PC版Chromeでの表示例（v1.1.2）。カード画像・ゲームデータ ©SEGA。
-
-## 開発
-
-Node.js 18以降で実行できます。標準機能だけを使うため、依存パッケージのインストールは不要です。
-
-```sh
-node outputs/build.cjs
-node --test outputs/wonder-deck.test.cjs
-```
-
-`outputs/wonder-deck.js` が編集用ソースです。ビルドは同じフォルダの実行ソース、登録コード、導入HTMLを更新します。`outputs/install.template.html` が導入ページのテンプレートです。圧縮しない標準ビルドでも単体で動作します。任意の圧縮方法は [outputs/README.md](outputs/README.md) を参照してください。
-
-配布用ファイルもGitで管理します。ソースを修正した場合は、テストとビルドを実行して生成物も一緒にコミットしてください。`work/` は一時作業用で、Gitの管理対象外です。
-
-## 公開するには（管理者向け）
-
-1. GitHub Pagesを利用できる公開範囲・プランであることを確認します。現在の非公開リポジトリでは設定画面に「Upgrade or make this repository public to enable Pages」と表示され、Pagesは利用できません。公開リポジトリに変更するか、非公開リポジトリのPagesに対応するプランが必要です。
-2. このリポジトリをGitHubへpushします。
-3. GitHubの Settings → Pages → Build and deployment → Source を **GitHub Actions** にします。
-4. Actionsの **Publish installation page** を実行します。以降は `main` の配布ファイル更新時に自動公開します。
-5. `https://satokoyo.github.io/wlw/` でコピー・登録手順を確認します。
-
-ワークフローはコミット済みの導入HTML・1行コード・ソースだけを配信します。テスト用データやローカル作業フォルダは配信しません。ページ側でカード情報やアカウント情報を取得する処理もありません。
-
-[GitHub Pages公式手順](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)に沿った設定です。別アカウントへforkする場合は、READMEと導入テンプレートの公開先URLを変更してから再ビルドしてください。
+iPhone Safari実機での起動・保存は未確認です。★は対応する装備構成条件の判定で、試合中の全効果の発動を保証する表示ではありません。
 
 ## 構成
 
-- `outputs/wonder-deck.js`：編集用ソース
-- `outputs/wonder-deck.test.cjs`：自動テスト
-- `outputs/build.cjs`：登録コード・導入HTMLの生成
-- `outputs/install.html`：公開用・単体で開ける導入ページ
-- `outputs/install.template.html`：導入ページの編集用テンプレート
-- `.github/workflows/pages.yml`：GitHub Pagesへの配信設定
-- `outputs/wonder-deck.bookmarklet.txt`：ブックマーク登録URL
-- `outputs/wonder-deck.min.js`：登録URLに含まれる実行ソース
-- `outputs/README.md`：利用手順と動作仕様
-- `outputs/verification.md`：検証記録
+```text
+src/wonder-deck.js              編集するソース
+scripts/build.cjs               配布物を生成するスクリプト
+tests/wonder-deck.test.cjs       Node.js標準テスト
+site/index.template.html        導入ページのテンプレート
+site/assets/                    掲載用の画面キャプチャ
+dist/                          コミット済み配布物・Pages配信対象
+docs/                          操作手順・設計・検証記録
+.github/workflows/pages.yml     Pages配信設定
+```
 
-非公式の補助ツールです。カード画像・ゲームデータは ©SEGA に帰属し、利用画面のキャプチャに含まれます。カード画像の素材集は同梱していません。
+`dist/`は生成物です。ソースやテンプレートを変更してから再生成してください。`work/`、認証情報、APIの生データ、依存環境は配布対象に含めません。
+
+## ビルド・テスト
+
+Node.js 18以降を使い、リポジトリ直下で実行します。標準ビルドに追加パッケージは必要ありません。
+
+```sh
+node scripts/build.cjs
+node --test tests/wonder-deck.test.cjs
+```
+
+標準ビルドはソースをそのまま登録コードへ変換します。既存のPlaywrightに含まれるBabel bundleがある場合のみ、`node scripts/build.cjs /path/to/playwright/lib/transform/babelBundle.js` で空白・コメントを削減できます。この任意機能はPlaywright内部APIに依存します。圧縮ツールがない場合も標準ビルドを利用できます。`dist/wonder-deck.min.js` は登録コードの実体で、標準ビルドでは非圧縮です。
+
+画面キャプチャは導入HTML内に埋め込みます。画像用の外部通信や追加配信設定は不要です。ブックマークレットのサイズには影響しません。
+
+## GitHub Pagesで公開する
+
+1. 公開範囲とプランを確認します。GitHub Freeでは公開リポジトリが必要です。リポジトリを公開するとソースと履歴も閲覧可能になります。
+2. Settings → Pages → Source を **GitHub Actions** にします。
+3. Actions → **Publish installation page** を実行します。
+4. `https://satokoyo.github.io/wlw/` を確認します。
+
+以降は `main` の配布物などの変更でテストと公開処理が実行されます。Pagesには `dist/` だけを配信します。現在の設定状態はGitHubのSettingsとActionsで確認してください。
+
+SourcetreeのOAuth認証に `workflow` 権限がない場合、ワークフローの追加・変更はGitHubのWeb画面で行い、ローカルへpullします。本体の通常更新に権限追加は不要です。
+
+[GitHub Pages公式手順](https://docs.github.com/en/pages/quickstart)
+
+## 通信・権利表記
+
+ブックマークレットのAPI通信先はWonder.NETの同一オリジンです。ログイン中のセッションを使い、カード変更キーは実行中に取得します。認証情報の固定埋め込み、外部解析サービス、外部カードDBはありません。
+
+本ツールはSEGA公式ではありません。ゲーム名・カード画像・ゲームデータなどの権利は各権利者に帰属します。掲載キャプチャは操作説明用です。第三者素材の再利用権を許諾するものではありません。ソースコードの再配布ライセンスはまだ指定していません。公開リポジトリであることを包括的な利用許諾と解釈しないでください。

@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('./wonder-deck.js');
+const {equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('../src/wonder-deck.js');
 const id=n=>n.toString(16).padStart(32,'0');
 const raw=(n,ct=2,lv=6)=>({ci:id(n),na:'Card '+n,ca:ct===1?1:7,ct,lv,ol:10,te:'assbsfcrhpufs',ra:3,fi:8,gr:[5]});
 const card=(n,kind='assist',level=6)=>({id:id(n),kind,level,owned:true});
@@ -168,9 +168,9 @@ test('card overlay labels include specific category text without confusing card 
 
 test('published copy code, drag link and executable source are identical',()=>{
  const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
- const read=name=>fs.readFileSync(path.join(__dirname,name),'utf8');
+ const read=name=>fs.readFileSync(path.join(__dirname,'../dist',name),'utf8');
  const bookmark=read('wonder-deck.bookmarklet.txt').trim();
- const html=read('install.html');
+ const html=read('index.html');
  const decodeHTML=s=>s.replace(/&(amp|lt|gt|quot|#39);/g,(_,entity)=>({amp:'&',lt:'<',gt:'>',quot:'"','#39':"'"}[entity]));
  assert.equal(decodeHTML(html.match(/<textarea\b[^>]*id="code"[^>]*>([\s\S]*?)<\/textarea>/)[1]),bookmark);
  assert.equal(decodeHTML(html.match(/<a\b[^>]*id="bookmark"[^>]*href="([^"]+)"/)[1]),bookmark);
