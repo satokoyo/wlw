@@ -5,8 +5,8 @@ const data=JSON.parse(read('data/reference-stats.json'));
 test('reference data validates; all reviewed entries have fixed public source and finite values or null',()=>{
  const index=referenceIndex(data);assert.equal(index.size,data.cards.length);
  assert.ok(data.cards.length>=180);
- for(const row of data.cards){assert.ok(referenceFor(row,index));for(const v of Object.values(row.stats)){assert.ok([939,778,788].includes(v.source));assert.equal(v.strength,'unspecified');}}
- assert.equal(read('data/reference-stats.json'),read('dist/reference-stats-1.3.2.json'));
+ for(const row of data.cards){assert.ok(referenceFor(row,index));for(const v of Object.values(row.stats)){assert.ok([939,778,788,769,945,1005,984].includes(v.source));assert.equal(v.strength ?? data.defaults.strength,'unspecified');}}
+ assert.deepEqual(JSON.parse(read('data/reference-stats.json')),JSON.parse(read('dist/reference-stats-1.4.0.json')));
 });
 test('exact name binding normalizes widths and whitespace, separates kinds and refuses ambiguity',()=>{
  const index=referenceIndex(data);
@@ -44,10 +44,10 @@ test('short loader locks duplicate launches and resets on error/timeout',()=>{
  l.script.onerror();assert.equal(l.window.__wonderDeckLoading,undefined);assert.equal(l.alerts.length,1);l.run();assert.notEqual(l.script,first);l.timeout();assert.equal(l.window.__wonderDeckLoading,undefined);
 });
 test('loader preserves an existing same-version UI and has matching integrity for the versioned script',()=>{
- const l=loader();let shown=0;l.window.__wonderDeck={version:'1.3.2',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
+ const l=loader();let shown=0;l.window.__wonderDeck={version:'1.4.0',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
  delete l.window.__wonderDeck;l.run();
- assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.3.2.js');
- assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.3.2.js')).digest('base64'));
+ assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.4.0.js');
+ assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.4.0.js')).digest('base64'));
  assert.equal(l.script.crossOrigin,'anonymous');assert.ok(code.length<1600);
 });
 
@@ -106,4 +106,30 @@ test('special-only numbers become totals only when official base effects establi
  assert.equal(referenceValue(entry,card,true,null,'ss').value,5);
  assert.equal(referenceValue(entry,card,false,null,'ss').value,0);
  assert.equal(referenceValue(entry,{...card,effect:'assstibs▲ストレート攻撃力が上がるbs〔特殊〕▲ストレート攻撃力が上がる'},true,null,'ss').value,null);
+});
+
+test('reviewed values prefer numeric tables and discard superseded or unverified values',()=>{
+ const index=referenceIndex(data),v=(name,stat)=>referenceFor({name,kind:'assist'},index).stats[stat];
+ assert.equal(v('宝来の小槌＋','ds').active,12.75);
+ assert.equal(v('重い石鉢','ds').base,5.8);
+ assert.equal(v('帽子屋のティーカップ','skill').active,0);
+ assert.equal(v('踊り続ける玩具の汽車','skill').active,24.17);
+ assert.equal(v('花の妖精王子の羽','skill').base,0);
+ assert.equal(v('鬼神の指輪','skill').active,null);
+ assert.equal(v('乙女が流した神秘の涙','ds').active,11.8);
+ assert.equal(v('魔女が示す宝のマント','ds').active,7.7);
+});
+test('dedicated supplemental effects require the matching cast, retaining unconditional base',()=>{
+ const index=referenceIndex(data),card={id:'a',name:'聖火灯す令嬢の小帽子',kind:'assist',level:3,peculiar:[{na:'リン'}],effect:'asssti hpu spu'};
+ const entry=referenceFor(card,index).stats.skill;
+ assert.equal(referenceValue(entry,card,true,{castName:'リン'},'skill').value,10);
+ assert.equal(referenceValue(entry,card,true,{castName:'ミクサ'},'skill').value,0);
+ assert.equal(referenceValue(entry,card,true,{},'skill').value,null);
+ assert.equal(referenceTotals([{id:'a',type:'assist'}],new Map([['a',card]]),index,8,true,'リン').skill.value,10);
+ assert.equal(referenceTotals([{id:'a',type:'assist'}],new Map([['a',card]]),index,8,true,'ミクサ').skill.value,0);
+});
+
+test('cast-only preview context does not trigger incomplete equipment evaluation',()=>{
+ const index=referenceIndex(data),card={name:'創聖模写・苛烈の究道',kind:'assist'};
+ assert.equal(referenceValue(referenceFor(card,index).stats.ds,card,true,{castName:'リン'},'ds').value,27);
 });

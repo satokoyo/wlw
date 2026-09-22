@@ -32,6 +32,7 @@ fs.writeFileSync(path.join(dist,'wonder-deck.bookmarklet.txt'),bookmark+'\n');
 fs.writeFileSync(path.join(dist,'index.html'),html);
 fs.writeFileSync(path.join(dist,'wonder-deck-'+version+'.js'),compact);
 fs.writeFileSync(path.join(dist,'wonder-deck.standalone.txt'),standalone+'\n');
-fs.copyFileSync(path.join(root,'data/reference-stats.json'),path.join(dist,'reference-stats-'+version+'.json'));
+const reference=JSON.parse(fs.readFileSync(path.join(root,'data/reference-stats.json'),'utf8'));
+fs.writeFileSync(path.join(dist,'reference-stats-'+version+'.json'),JSON.stringify(reference)+'\n');
 fs.copyFileSync(path.join(root,'data/README.md'),path.join(dist,'DATA-NOTICE.txt'));
 console.log(JSON.stringify({sourceBytes:Buffer.byteLength(source),compactBytes:Buffer.byteLength(compact),bookmarkCharacters:bookmark.length}));

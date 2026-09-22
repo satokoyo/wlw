@@ -4,7 +4,7 @@
 /* Wonder Deck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.3.2';
+  const VERSION = '1.4.0';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
@@ -63,7 +63,8 @@
       if(!['assist','soul'].includes(row.kind)||typeof row.name!=='string')throw Error('参考カードの形式が異なります');
       for(const [stat,v] of Object.entries(row.stats || {})){
         if(!STAT_LABELS[stat] || !v || !['base','active'].every(k=>v[k]===null || (typeof v[k]==='number' && Number.isFinite(v[k]) && Math.abs(v[k])<=1000)))throw Error('参考値が不正です');
-        if(v.source!=null && ![939,778,788].includes(v.source))throw Error('参考値の出典が不正です');
+        if(v.castName!=null && (typeof v.castName!=='string'||!v.castName.trim()))throw Error('専用条件が不正です');
+        if(v.source!=null && ![939,778,788,769,945,1005,984].includes(v.source))throw Error('参考値の出典が不正です');
         if(v.condition && (!Number.isInteger(v.condition.count)||v.condition.count<1||v.condition.count>5||Object.keys(v.condition).some(k=>!['count','rarity','category','level','excludeSoul'].includes(k))))throw Error('参考値の条件が不正です');
         for(const [overlap,values] of Object.entries(v.byOverlap || {}))if(!/^(?:[0-9]|10)$/.test(overlap)||!['base','active'].every(k=>values[k]===null||Number.isFinite(values[k])))throw Error('強化値別データが不正です');
       }
@@ -79,6 +80,7 @@
     let text=effectText(card.effect).normalize('NFKC').replace(/\s/g,'');
     // Only a complete official-format effect description qualifies. Unknown
     // shorthand, generic attack buffs and unsupported wording stay unknown.
+    if(card?.peculiar?.length)return false; // Separate cast-specific effects must not be inferred absent from the base text.
     if(!text.includes('使用可能レベルに達すると') || !text.includes('【アシスト】'))return false;
     if(baseOnly){const split=text.search(/[〔【\[(]特殊[〕】\])]/);if(split<0)return false;text=text.slice(0,split);}
     const target={ss:/ストレート|SS/i,ds:/ドロー|DS/i,skill:/スキル/}[stat];
@@ -107,12 +109,16 @@
     return yes>=rule.count?true:yes+unknown<rule.count?false:null;
   }
   function referenceValue(entry,card,active=false,context,stat){
-    if(referenceNoImpact(card,stat))return {value:0,approximate:false,calibrated:false,noImpact:true};
+    if(!entry?.castName && referenceNoImpact(card,stat))return {value:0,approximate:false,calibrated:false,noImpact:true};
     if(!entry)return {value:null,approximate:false,calibrated:false};
+    if(entry.castName && active){
+      if(!context?.castName)return {value:null,approximate:false,calibrated:false};
+      if(referenceName(entry.castName)!==referenceName(context.castName))active=false;
+    }
     const calibrated=entry.byOverlap?.[String(card?.overlap)];
     const values=calibrated || entry;
     let useActive=active,intermediate=false;
-    if(entry.condition&&context){
+    if(entry.condition&&context?.slots&&context?.catalog){
       const eligible=referenceCondition(entry.condition,card,context.slots,context.catalog,context.level);
       if(eligible===null)return {value:null,approximate:false,calibrated:!!calibrated};
       // Equipment-only effects are automatic; battle conditions still require an assumption.
@@ -123,14 +129,14 @@
     if(value==null && referenceNoImpact(card,stat,true)){if(!useActive)value=0;else if(Number.isFinite(entry.specialDelta))value=entry.specialDelta;}
     return {value:Number.isFinite(value)?value:null,approximate:!!entry.approximate && (!entry.approximateStates || entry.approximateStates.includes(useActive?'active':'base')),calibrated:!!calibrated};
   }
-  function referenceTotals(slots,catalog,index,level=8,active=false){
+  function referenceTotals(slots,catalog,index,level=8,active=false,castName){
     const result=Object.fromEntries(Object.keys(STAT_LABELS).map(k=>[k,{value:0,known:0,unknown:0,approximate:0,calibrated:0}]));
     for(const slot of slots){
       if(!slot.id || !['assist','soul'].includes(slot.type))continue;
       const original=catalog.get(slot.id),card=original && {...original,id:slot.id,overlap:slot.overlap ?? original.overlap},row=referenceFor(card,index);
       if(Number.isFinite(card?.level) && card.level>level)continue;
       for(const stat of Object.keys(result)){
-        const v=referenceValue(row?.stats?.[stat],card,active,{slots,catalog,level},stat);
+        const v=referenceValue(row?.stats?.[stat],card,active,{slots,catalog,level,castName},stat);
         if(!Number.isFinite(card?.level)||!Number.isFinite(v.value)){result[stat].unknown++;continue;}
         result[stat].value+=v.value;result[stat].known++;
         if(v.approximate)result[stat].approximate++;
@@ -445,35 +451,36 @@
   }
   let referenceData=null, referenceMap=new Map(), referenceState='読込中', referenceLevel=8, referenceActive=true;
   const refNumber=n=>(n>=0?'+':'')+Number(n.toFixed(2));
+  const referenceCastContext=()=>({castName:castList.find(c=>c.id===engine?.cast)?.name || engine?.castName});
   function referenceLine(c){
     if(!['assist','soul'].includes(c.kind))return '';
     const row=referenceFor(c,referenceMap);
     if(!row && referenceState!=='取得済み')return '参考値 '+referenceState;
     return Object.entries(STAT_LABELS).map(([key,label])=>{
-      const v=referenceValue(row?.stats[key],c,referenceActive,null,key),n=v.value;
-      return label+(Number.isFinite(n)?(v.approximate?'≈':'')+refNumber(n)+(key==='ss'?'':'%'):'?');
+      const v=referenceValue(row?.stats[key],c,referenceActive,referenceCastContext(),key),n=v.value;
+      return label+(Number.isFinite(n)?(v.approximate?'≈':'')+refNumber(n):'?');
     }).join(' / ');
   }
   function referenceDetail(c){
     if(!['assist','soul'].includes(c.kind))return '';
     const row=referenceFor(c,referenceMap);
     return `<section class="reference"><strong>ステータス参考値（Wiki掲載値）</strong><p>強化値別の記載がある項目のみ補正。実際の威力ではありません。</p>${Object.entries(STAT_LABELS).map(([key,label])=>{
-      const v=row?.stats[key],normal=referenceValue(v,c,false,null,key),special=referenceValue(v,c,true,null,key),unit=key==='ss'?'（Wiki単位）':'%',prefix=v?.approximate?'約':'';
-      return `<p><b>${label}</b> 通常 ${Number.isFinite(normal.value)?prefix+refNumber(normal.value)+unit:'不明'} ／ 特殊込み ${Number.isFinite(special.value)?prefix+refNumber(special.value)+unit:'不明'}${normal.noImpact?'<br>公式効果文にこの能力への影響なし':''}${v?`<br>${esc(v.note || '追加条件の記載なし')}${normal.calibrated?' · 所持強化値の記載あり':''} · <a href="${referenceData.sources[v.source]}" target="_blank" rel="noopener noreferrer">出典</a>`:''}</p>`;
+      const v=row?.stats[key],normal=referenceValue(v,c,false,referenceCastContext(),key),special=referenceValue(v,c,true,referenceCastContext(),key),unit='',prefix=v?.approximate?'約':'';
+      return `<p><b>${label}</b> 通常 ${Number.isFinite(normal.value)?prefix+refNumber(normal.value)+unit:'不明'} ／ 特殊込み ${Number.isFinite(special.value)?prefix+refNumber(special.value)+unit:'不明'}${normal.noImpact?'<br>公式効果文にこの能力への影響なし':''}${v?`<br>${esc((v.note || '追加条件の記載なし').replace(/[％%]/g,''))}${normal.calibrated?' · 所持強化値の記載あり':''} · <a href="${referenceData.sources[v.source]}" target="_blank" rel="noopener noreferrer">出典</a>`:''}</p>`;
     }).join('')}<p>確認日 ${esc(referenceData?.reviewedAt || '—')}。未収録・未判明は0扱いしません。</p></section>`;
   }
   function referenceDeck(e){
-    const values=referenceTotals(e.slots,catalog,referenceMap,referenceLevel,referenceActive);
-    return `<section class="reference"><strong>装備の掲載値小計（参考）</strong><p>強化値の一部に対応・未収録あり</p><div>${Object.entries(values).map(([k,v])=>`${STAT_LABELS[k]} ${v.known?(v.approximate?'≈':'')+refNumber(v.value)+(k==='ss'?'':'%'):'—'} <small>不明${v.unknown}枚${v.calibrated?' · 強化値対応'+v.calibrated+'枚':''}</small>`).join('<br>')}</div><details><summary>計算条件・注意</summary><label>想定Lv <select id="reference-level">${Array.from({length:8},(_,i)=>`<option ${referenceLevel===i+1?'selected':''}>${i+1}</option>`).join('')}</select></label><label><input id="reference-active" type="checkbox" ${referenceActive?'checked':''}>特殊効果の最大成長・条件達成を仮定</label><p>Wiki掲載値の比較用。記載のない強化値は未補正。装備条件は対応項目のみ想定Lvで判定。≈は概算を含む小計。影響なしを公式効果文で確認できた項目は0。${referenceActive?'成長型は最大値を使用。戦闘条件を仮定しますが、装備条件の不足は除外し、発動する低下効果も差し引きます。':'通常値と対応する装備条件が成立する効果を集計。'}リザーブ・キャスト基礎値・バフ・未収録の増減は含みません。SSはWiki単位、DS・スキルは%。</p><p>${esc(referenceState)} · ${esc(referenceData?.reviewedAt || '')}</p></details></section>`;
+    const values=referenceTotals(e.slots,catalog,referenceMap,referenceLevel,referenceActive,referenceCastContext().castName);
+    return `<section class="reference"><strong>装備の掲載値小計（参考）</strong><div>${Object.entries(values).map(([k,v])=>`${STAT_LABELS[k]} ${v.known?(v.approximate?'≈':'')+refNumber(v.value):'—'} <small>不明${v.unknown}枚${v.calibrated?' · 強化値対応'+v.calibrated+'枚':''}</small>`).join('<br>')}</div><details><summary>計算条件・注意</summary><label>想定Lv <select id="reference-level">${Array.from({length:8},(_,i)=>`<option ${referenceLevel===i+1?'selected':''}>${i+1}</option>`).join('')}</select></label><label><input id="reference-active" type="checkbox" ${referenceActive?'checked':''}>特殊効果の最大成長・条件達成を仮定</label><p>Wiki掲載値の比較用。記載のない強化値は未補正。装備条件は対応項目のみ想定Lvで判定。≈は概算を含む小計。影響なしを公式効果文で確認できた項目は0。${referenceActive?'成長型は最大値を使用。戦闘条件を仮定しますが、装備条件の不足は除外し、発動する低下効果も差し引きます。':'通常値と対応する装備条件が成立する効果を集計。'}リザーブ・キャスト基礎値・バフ・未収録の増減は含みません。能力間で尺度が異なるため、SS・DS・スキル同士は合算しません。</p><p>${esc(referenceState)} · ${esc(referenceData?.reviewedAt || '')}</p></details></section>`;
   }
   async function loadReference(){
     const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
     try{
-      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.3.0.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.4.0.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       const data=await response.json(),index=referenceIndex(data);
       // Only fixed, reviewed source links may be rendered.
-      for(const page of [939,778,788])if(data.sources?.[page]!==`https://w.atwiki.jp/wlws/pages/${page}.html`)throw Error('出典が不正です');
+      for(const page of [939,778,788,769,945,1005,984])if(data.sources?.[page]!==`https://w.atwiki.jp/wlws/pages/${page}.html`)throw Error('出典が不正です');
       if(!host.isConnected)return;
       referenceData=data;referenceMap=index;referenceState='取得済み';
     }catch(err){referenceState='取得できません（カード編集は利用できます）';}
@@ -553,7 +560,7 @@
     if(!c){detail.innerHTML='<div class="detail-title"><h2>カードの効果</h2><button data-action="detail-close">閉じる</button></div><div class="empty">デッキの枠、または一覧のカードを選んでください。</div>';return;}
     const why=e.reason(c), current=e.current;
     const equipped=e.slots.filter(s=>s.id===c.id).map(slotLabel);
-    detail.innerHTML=`<div class="detail-title"><h2>${esc(c.name)}</h2><button data-action="detail-close">閉じる</button></div><div class="detail-summary"><img class="portrait" src="${img(c)}" alt="${esc(c.name)}"><div class="data"><span>${esc(LABEL[c.kind])}</span>${c.level?`<span>使用可能 Lv.${c.level}</span>`:''}${c.rarity?`<span>${RARITY[c.rarity]||c.rarity}</span>`:''}<span>強化 ${esc(overlap(c))}</span>${c.mp!=null?`<span>MP ${c.mp}</span>`:''}${c.uses!=null?`<span>使用回数 ${c.uses}</span>`:''}${c.first!=null?`<span>初回CT ${c.first}</span>`:''}${c.next!=null?`<span>再使用CT ${c.next}</span>`:''}</div></div><div class="detail-body">${equipped.length?`<p class="muted">装備中：${esc(equipped.join(' ／ '))}</p>`:''}${referenceDetail(c)}<div class="effect">${effectHTML(c.effect)}</div>${c.peculiar.map(r=>`<p class="muted">固有効果：${esc(r.na)}のみ適用</p>`).join('')}${c.boosts.length?`<p class="muted">強化対象：${esc(c.boosts.join('・'))}</p>`:''}</div><div class="actions"><p class="reason">${esc(why || (c.equipped?'他枠に装備中です。公式の入れ替え処理で構成を更新します。':slotLabel(current)+'にセットします'))}</p><button class="primary" data-action="save" ${why?'disabled':''}>この枠にセット</button>${current?.editable && current.id?`<button data-action="remove" ${e.locked||e.loading?'disabled':''}>この枠のカードをはずす</button>`:''}</div>`;
+    detail.innerHTML=`<div class="detail-title"><h2>${esc(c.name)}</h2><button data-action="detail-close">閉じる</button></div><div class="detail-summary"><img class="portrait" src="${img(c)}" alt="${esc(c.name)}"><div class="data"><span>${esc(LABEL[c.kind])}</span>${c.level?`<span>使用可能 Lv.${c.level}</span>`:''}${c.rarity?`<span>${RARITY[c.rarity]||c.rarity}</span>`:''}<span>強化 ${esc(overlap(c))}</span>${c.mp!=null?`<span>MP ${c.mp}</span>`:''}${c.uses!=null?`<span>使用回数 ${c.uses}</span>`:''}${c.first!=null?`<span>初回CT ${c.first}</span>`:''}${c.next!=null?`<span>再使用CT ${c.next}</span>`:''}</div></div><div class="detail-body">${equipped.length?`<p class="muted">装備中：${esc(equipped.join(' ／ '))}</p>`:''}<div class="effect">${effectHTML(c.effect)}</div>${c.peculiar.map(r=>`<p class="muted">固有効果：${esc(r.na)}のみ適用</p>`).join('')}${c.boosts.length?`<p class="muted">強化対象：${esc(c.boosts.join('・'))}</p>`:''}${referenceDetail(c)}</div><div class="actions"><p class="reason">${esc(why || (c.equipped?'他枠に装備中です。公式の入れ替え処理で構成を更新します。':slotLabel(current)+'にセットします'))}</p><button class="primary" data-action="save" ${why?'disabled':''}>この枠にセット</button>${current?.editable && current.id?`<button data-action="remove" ${e.locked||e.loading?'disabled':''}>この枠のカードをはずす</button>`:''}</div>`;
   }
   function chooseCard(id){if(!engine || engine.loading)return;const c=engine.cards.find(c=>c.id===id);if(unavailableReason(c))return;engine.selected=c;renderDetail();$$('.card').forEach(b=>{const selected=b.dataset.value===id;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});$('.detail').classList.add('open');$('.detail-backdrop').classList.add('open');$('.detail').scrollTop=0;}
   function close(){
