@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 satokoyo
+ */
 /* Wonder Deck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';

@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 satokoyo
+ */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('../src/wonder-deck.js');
@@ -246,4 +249,14 @@ test('an unsupported second equipment condition is retained instead of claiming 
  const c={...card(4),effect:'このカード以外にレアリティがSRのアシストカードが１枚以上発動している場合攻撃力が上がる。bsマスタースキルの残り使用回数が０回の場合速度が上がる。'};
  const cat=new Map([[id(5),{...card(5),rarity:3}],[id(6),{...card(6,'soul'),rarity:3}]]);
  assert.equal(equipmentStars(c,makeDeck(),cat).stars,'★？');
+});
+
+ test('distribution retains the MIT license, including the standalone bookmarklet',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
+ const license=read('LICENSE');
+ assert.equal(read('dist/LICENSE'),license);
+ assert.ok(read('dist/wonder-deck.min.js').startsWith('/*!\n'+license+'*/\n'));
+ assert.ok(decodeURIComponent(read('dist/wonder-deck.bookmarklet.txt').trim().slice(11)).includes(license));
+ assert.ok(read('dist/index.html').includes('href="LICENSE"'));
 });
