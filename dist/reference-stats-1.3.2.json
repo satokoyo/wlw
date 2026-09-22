@@ -1,0 +1,4565 @@
+{
+  "schemaVersion": 1,
+  "revision": "2026-09-23.1",
+  "reviewedAt": "2026-09-23",
+  "sources": {
+    "939": "https://w.atwiki.jp/wlws/pages/939.html",
+    "778": "https://w.atwiki.jp/wlws/pages/778.html",
+    "788": "https://w.atwiki.jp/wlws/pages/788.html"
+  },
+  "notice": "Wiki掲載値の参考比較。特殊効果は最大成長を仮定。未補正・未収録あり。",
+  "cards": [
+    {
+      "name": "玉龍",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.35,
+          "active": 4.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "踊り子ラクス",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.35,
+          "active": 4.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 6.8,
+          "active": 6.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ダムとディー",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.35,
+          "active": 4.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ヘン",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.35,
+          "active": 4.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ロードピス",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 2.35,
+          "active": 2.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "タイガーリリー",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 2.35,
+          "active": 2.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 4.4,
+          "active": 4.4,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "海賊アビルダ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.8,
+          "active": 4.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "美声のハーン",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.8,
+          "active": 4.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "神酒",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.8,
+          "active": 4.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "シャーロッテ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.8,
+          "active": 4.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "氷霧の妖魔ニクス",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.15,
+          "active": 3.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 9.67,
+          "active": 9.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "鬼狩人 源綱",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.15,
+          "active": 3.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "弾き語りのエーゼル",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 6,
+          "active": 6,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "名工 鬼六",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 6,
+          "active": 6,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "源氏の君",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 1.85,
+          "active": 1.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 6.17,
+          "active": 6.17,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "しらゆき＆べにばら",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 1.85,
+          "active": 1.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "宵のヴェガ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 1.85,
+          "active": 1.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ランプの魔神ジェネヴァ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 1.85,
+          "active": 1.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "童話の探し人 セイン",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.35,
+          "active": 3.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "黒獣 羅車",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.35,
+          "active": 3.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ハンター",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.35,
+          "active": 3.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "カボチャ頭のジャック",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.35,
+          "active": 3.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "skill": {
+          "base": 2.5,
+          "active": 2.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "晩夏の花火 お菊",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.35,
+          "active": 3.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "護符童子 栗丸",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.85,
+          "active": 5.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ティンカーベル",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.85,
+          "active": 5.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "悪童 ロストボーイズ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.85,
+          "active": 5.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "風精シルフ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.85,
+          "active": 5.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "海賊ボニー",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.85,
+          "active": 5.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "さかきの造",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.85,
+          "active": 5.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "火精ジャックランタン",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.85,
+          "active": 5.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "クィーンオブハート",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.5,
+          "active": 3.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "魔術のグレーテル",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.5,
+          "active": 3.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 20,
+          "active": 20,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "八艘飛びの牛若丸",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.5,
+          "active": 3.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 6.26,
+          "active": 16.5,
+          "note": "特殊効果最大時の合計",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "金の娘 カラート",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.5,
+          "active": 3.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "skill": {
+          "base": 5,
+          "active": 5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "春心の緑 雀蘭",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.5,
+          "active": 3.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ドルシネア",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.5,
+          "active": 3.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "戦隊頭目 ゼクス",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 0,
+          "active": 3,
+          "note": "概算・SR装備条件",
+          "strength": "unspecified",
+          "source": 939,
+          "condition": {
+            "rarity": 3,
+            "count": 1
+          },
+          "approximate": true,
+          "approximateStates": [
+            "active"
+          ]
+        },
+        "ds": {
+          "base": 0,
+          "active": 7,
+          "note": "概算・装備条件",
+          "strength": "unspecified",
+          "source": 778,
+          "condition": {
+            "rarity": 3,
+            "count": 1
+          },
+          "approximate": true,
+          "approximateStates": [
+            "active"
+          ]
+        },
+        "skill": {
+          "base": 0,
+          "active": 3.33,
+          "note": "SR装備条件",
+          "strength": "unspecified",
+          "source": 788,
+          "condition": {
+            "rarity": 3,
+            "count": 1
+          },
+          "approximate": false
+        }
+      }
+    },
+    {
+      "name": "三銃士 アラミス",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": null,
+          "note": "現行値不明",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 0,
+          "active": 10,
+          "note": "特殊効果込み",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "破壊少女シヴァ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3.5,
+          "active": 4.5,
+          "note": "攻撃MS条件",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 6.2,
+          "active": 7,
+          "note": "特殊効果込み",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 0,
+          "active": 0.83,
+          "note": "攻撃MS",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "大河創りのお札",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 1.5,
+          "active": 1.5,
+          "note": "特殊効果は防御強化へ変更。旧HP条件のSS+7は除外",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "小刀・童話斬り",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 1,
+          "active": 1,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "skill": {
+          "base": 0,
+          "active": -50,
+          "note": "他の非ソウルSRが発動時に低下",
+          "strength": "unspecified",
+          "source": 788,
+          "condition": {
+            "rarity": 3,
+            "count": 1,
+            "excludeSoul": true
+          }
+        }
+      }
+    },
+    {
+      "name": "宵闇の紳士服",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 1.15,
+          "active": 1.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "嘘隠さぬ王の帽子",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 1.35,
+          "active": 1.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "意思持つ災厄の魔法剣",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 2.35,
+          "active": 5.35,
+          "note": "特殊効果込み",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 2.17,
+          "active": 12.57,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 0,
+          "active": 6.67,
+          "note": "スキル使用回数条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "泡沫の姫の短剣",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 4,
+          "active": 8,
+          "note": "レベルアップ後",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "天と獄への土産物",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": null,
+          "note": "最大成長時の特殊分。基本SSなしと公式文から確認できる時だけ合計に反映",
+          "strength": "unspecified",
+          "source": 939,
+          "specialDelta": 5
+        },
+        "ds": {
+          "base": null,
+          "active": 12,
+          "note": "概算・特殊効果の発動を仮定",
+          "strength": "unspecified",
+          "source": 778,
+          "approximate": true,
+          "approximateStates": [
+            "active"
+          ]
+        }
+      }
+    },
+    {
+      "name": "腹裂きの鋏と糸",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 4.15,
+          "active": 4.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "怪力無双の百貫目金棒",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 4.15,
+          "active": 9.15,
+          "note": "MP条件",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "神光の七星剣",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 1.5,
+          "active": 4.5,
+          "note": "攻撃回数条件",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 2.8,
+          "active": 13,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 0,
+          "active": 6.67,
+          "note": "攻撃回数条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "海賊女王の掠奪剣",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 2,
+          "active": 10,
+          "note": "森の外",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "裁きし者の童話集",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 1,
+          "active": 9,
+          "note": "SR装備条件",
+          "strength": "unspecified",
+          "source": 939,
+          "condition": {
+            "rarity": 3,
+            "count": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "創聖模写・自由の星見",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": 10,
+          "note": "SR装備と時間の条件",
+          "strength": "unspecified",
+          "source": 939,
+          "condition": {
+            "rarity": 3,
+            "count": 1,
+            "excludeSoul": true
+          },
+          "battle": true,
+          "equippedBase": 9
+        }
+      }
+    },
+    {
+      "name": "大風払いの扇",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 6.5,
+          "active": 6.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "義体工房の万能ネジ",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 7,
+          "active": 7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "心探しの新兵の銃",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": 3.3,
+          "note": "時間経過による成長",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 4.5,
+          "active": 22.2,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "鍔鳴る人喰いの魔刃",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": null,
+          "note": "最大成長時の特殊分。基本SSなしと公式文から確認できる時だけ合計に反映",
+          "strength": "unspecified",
+          "source": 939,
+          "specialDelta": 6
+        },
+        "ds": {
+          "base": 3.7,
+          "active": 17.2,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 0,
+          "active": 6.67,
+          "note": "攻撃による成長",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "人徳ある漁師の釣り竿",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 3.15,
+          "active": 3.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "守護騎士のサーベル",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 3.15,
+          "active": 3.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "兵集いし統率の杖",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 3.15,
+          "active": 3.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "マグスの魔笛",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 3.15,
+          "active": 3.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "鬼切り丸",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 5,
+          "active": 5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "鬼屠りの針",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 5,
+          "active": 5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "舌切のハサミ",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 5,
+          "active": 5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "伏龍の白羽扇",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 1.15,
+          "active": 1.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 2.2,
+          "active": 2.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 0,
+          "active": 16.67,
+          "note": "攻撃回数条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "灼熱の鬼払い豆",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 1.15,
+          "active": 1.15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "仇討ちの打金と打石",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 4,
+          "active": 4,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        },
+        "ds": {
+          "base": 8.1,
+          "active": 8.1,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "木こりの斧",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.33,
+          "active": 2.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "雨に濡れた弓",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.33,
+          "active": 2.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "まやかしの玉の枝",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.33,
+          "active": 2.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "美髯公の青龍偃月刀",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.33,
+          "active": 2.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "六尺の願い槌",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.67,
+          "active": 4.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "海の魔女の短剣",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.67,
+          "active": 4.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "虎縛りの荒縄",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.67,
+          "active": 4.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "蓬莱の玉の枝",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.67,
+          "active": 4.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "白騎士の槍＋",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.5,
+          "active": 4.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "老婆が作りし小人服",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2,
+          "active": 2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "底深い水差し",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2,
+          "active": 2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "老爺が作った小人靴",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2,
+          "active": 2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "雪に埋もれたかんざし",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2,
+          "active": 2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "伝国の黄金鎧",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2,
+          "active": 2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "騎士団の槍",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.2,
+          "active": 4.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "竹の杖",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.2,
+          "active": 4.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "くたびれた干竿",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.2,
+          "active": 4.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "煮えた大鍋",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.2,
+          "active": 4.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "儀礼の剣",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.2,
+          "active": 4.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "中身減らずの忘れ物",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.2,
+          "active": 4.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "アップルシューター",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 8,
+          "active": 8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "夢に見た王子の笛",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 8,
+          "active": 8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "手作りのピストル",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 8,
+          "active": 8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "悪心払いの鉄棒",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 8.1,
+          "active": 8.1,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "輝く姫守りの竹槍",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 8.1,
+          "active": 8.1,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "虚飾の七色羽飾り＋",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.2,
+          "active": 2.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 0.83,
+          "active": 0.83,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "時を刻む双針",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.2,
+          "active": 2.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "祟られた失敗作の南瓜",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.2,
+          "active": 2.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ヒト想いな鬼の金棒",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "鬼の金棒",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "水精払いの魔法鏡",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "花が描かれた布",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ヴァルキリーの鎧",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "鋼鉄の装甲",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "海賊のマント",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "嘆く野獣の服",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "冷たき女王の氷鏡",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": -5,
+          "active": -5,
+          "note": "スキル攻撃力の低下",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "身分隠しの狩装束",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "天女の羽衣",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "宝来の小槌",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.33,
+          "active": 9,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "武蔵坊の大薙刀＋",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.2,
+          "active": 6.4,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "宝来の小槌＋",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.5,
+          "active": 12.75,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 0,
+          "active": 3.33,
+          "note": "レベルアップ後",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "雷神の三つ巴太鼓",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.17,
+          "active": 12.2,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "黄衣の女神の弓",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 2.17,
+          "active": 17,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ライオン騎士の槍",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 12.1,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": -4.17,
+          "active": -4.17,
+          "note": "スキル攻撃力の低下",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "消失の名刀",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 13.5,
+          "active": 9.3,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "創聖模写・苛烈の究道",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 19,
+          "active": 27,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "幻炎に映る聖樹",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 13,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "契約の槌と金床",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 11.7,
+          "active": 18.34,
+          "note": "特殊効果込みの値へ切替（加算しない）",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": null,
+          "active": null,
+          "note": "低下効果あり・数値未判明",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "おそろいのリボン",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": null,
+          "active": 16,
+          "note": "概算・特殊効果の発動を仮定",
+          "strength": "unspecified",
+          "source": 778,
+          "approximate": true,
+          "approximateStates": [
+            "active"
+          ]
+        }
+      }
+    },
+    {
+      "name": "ギディ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.8,
+          "active": 6.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "海賊メアリ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.8,
+          "active": 6.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "グレイト",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.8,
+          "active": 6.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "童話の渡り人 ハンス",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 4.4,
+          "active": 4.4,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "チュウニペンギン",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 4.4,
+          "active": 4.4,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "チェネレントラ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 8.7,
+          "active": 8.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "冷たいラ・ビーズ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 8.7,
+          "active": 8.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "海賊狩り ホーキンズ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 8.7,
+          "active": 8.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "水精ウィンディーネ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "砂糖の妖精シュクル",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "金精コボルト",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ライラ王女",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "泉の武器商人ヘルメス",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "パンサー",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "童話を守る者 ライテ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "バンダースナッチ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "紅玉の花嫁ゲイレット",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "skill": {
+          "base": 5,
+          "active": 5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "蒼角の守女 サナ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "怠惰一徹 キルギース",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "キョンシー",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 6.26,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "瞳呪いの鏡の欠片",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0.83,
+          "active": 0.83,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "聖女が落とした黄金靴",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 1.67,
+          "active": 1.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "鏡の騎士の兜",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 1.67,
+          "active": 1.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "分裂する魔法の長箒",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 13.33,
+          "active": 13.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "白き女王のショール",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 3.33,
+          "active": 3.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "白き女王のショール＋",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 3.33,
+          "active": 3.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "勝負せし王の皿",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 15,
+          "active": 15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "飛翔月兎の冠",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 3.33,
+          "note": "停止後",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "献上品捕えの大袋",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 10,
+          "note": "MP消費条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "帽子屋のティーカップ",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 20,
+          "note": "スキル不使用時間",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "繋ぎし者の童話集",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 11.67,
+          "note": "SR装備条件",
+          "strength": "unspecified",
+          "source": 788,
+          "condition": {
+            "rarity": 3,
+            "count": 1,
+            "excludeSoul": true
+          }
+        }
+      }
+    },
+    {
+      "name": "泣き母鬼の赤い果実",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 17.5,
+          "note": "スキル使用回数条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "夢失いし悪童の鉄斧",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 8,
+          "note": "劣勢時",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "歌姫が拾った誰かの詩",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 3.33,
+          "note": "兵士撃破条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "麗しき白鳥のドレス",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 20,
+          "note": "レベルアップ後",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "足らずの骨董器",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 27.5,
+          "note": "対キャスト攻撃条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "僧正が谷の隠れ蓑",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 18.33,
+          "note": "森の外",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "癪病癒しの乳瓶",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 30.83,
+          "note": "停止条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "花の妖精王子の羽",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 1.67,
+          "active": 20,
+          "note": "成長後",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "創聖模写・不変の救難",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 19.17,
+          "note": "装備・時間条件",
+          "strength": "unspecified",
+          "source": 788,
+          "condition": {
+            "rarity": 3,
+            "count": 1,
+            "excludeSoul": true
+          },
+          "battle": true,
+          "equippedBase": 13.33
+        }
+      }
+    },
+    {
+      "name": "緑の語り部の扇",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 3.33,
+          "active": 24.17,
+          "note": "回復MS・攻撃条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "憧れの元帥杖",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 6.67,
+          "active": 27.5,
+          "note": "森の外",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "秘宝を暴くアリババ",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 4.17,
+          "active": 4.17,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "童話を正す者レダク",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 8.33,
+          "active": 8.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "地蔵の頭領 無辺",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 10,
+          "active": 10,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "暗殺部隊 六笠地蔵",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 7.5,
+          "active": 7.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "葛の葉",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 10,
+          "active": 10,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "玄奘三蔵",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 4.17,
+          "active": 4.17,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        },
+        "ss": {
+          "base": 5.65,
+          "active": 5.65,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "解放者 エリザ",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 3.66,
+          "active": 3.66,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        },
+        "ss": {
+          "base": 5.65,
+          "active": 5.65,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "リトル・ジョン",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 10.83,
+          "active": 10.83,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "黒牛騎士 タウロス",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 11.67,
+          "active": 11.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        },
+        "ss": {
+          "base": 5.65,
+          "active": 5.65,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "炎魂の魔女トゥルーデ",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 10.83,
+          "active": 10.83,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "牛魔王",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 8.33,
+          "active": 8.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "マッドハッター",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 15,
+          "active": 15,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "飛翔艦パンプキン",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 10,
+          "active": 10,
+          "note": "",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "歌姫ナイチンゲール",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 3.33,
+          "note": "攻撃による成長",
+          "strength": "unspecified",
+          "source": 788
+        },
+        "ss": {
+          "base": 2.35,
+          "active": 5.85,
+          "note": "攻撃による成長後。追加分は概算",
+          "strength": "unspecified",
+          "source": 939,
+          "approximate": true,
+          "approximateStates": [
+            "active"
+          ]
+        }
+      }
+    },
+    {
+      "name": "横綱くまごろう",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 13.33,
+          "note": "停止条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "大江山酒呑童子",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 3.33,
+          "note": "攻撃回数条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "竜継ぎし姫 ロッサ",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 6.67,
+          "note": "HP条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "滝夜叉姫",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 16.67,
+          "note": "SR装備条件",
+          "strength": "unspecified",
+          "source": 788,
+          "condition": {
+            "rarity": 3,
+            "count": 3
+          }
+        }
+      }
+    },
+    {
+      "name": "糸紡ぎの花嫁 アリア",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 16.67,
+          "note": "道具装備条件",
+          "strength": "unspecified",
+          "source": 788,
+          "condition": {
+            "category": 10,
+            "count": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "ドロテア・ツェンテス",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 17.5,
+          "note": "残り時間条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "童話を紡ぐ者 リィド",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 13.33,
+          "note": "装飾装備条件",
+          "strength": "unspecified",
+          "source": 788,
+          "condition": {
+            "category": 9,
+            "count": 3
+          }
+        },
+        "ds": {
+          "base": 9.8,
+          "active": 9.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "ss": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "科学のヘンゼル",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 10,
+          "note": "Lv5装備条件",
+          "strength": "unspecified",
+          "source": 788,
+          "condition": {
+            "level": 5,
+            "count": 3
+          }
+        }
+      }
+    },
+    {
+      "name": "瓜子姫",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 14.17,
+          "note": "巨人召喚条件",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "飛将 呂布",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 40,
+          "note": "WS発動後",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "変幻自在の化生斬り",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": -3.33,
+          "active": -3.33,
+          "note": "スキル攻撃力の低下",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "悪魔斬りの包丁",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": -4.17,
+          "active": -4.17,
+          "note": "スキル攻撃力の低下",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "魔女が示す宝のマント",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": -4.17,
+          "active": -4.17,
+          "note": "スキル攻撃力の低下",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "魔法受けし王子の毛皮",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": -5,
+          "active": -5,
+          "note": "スキル攻撃力の低下",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "悲しみを知る涙の真珠",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": -5,
+          "active": -5,
+          "note": "スキル攻撃力の低下",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "一夜断ちの王剣",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": -6.67,
+          "active": -6.67,
+          "note": "スキル攻撃力の低下",
+          "strength": "unspecified",
+          "source": 788
+        },
+        "ds": {
+          "base": 8.1,
+          "active": 8.1,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "仕事好きな小人の靴",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": null,
+          "active": null,
+          "note": "低下効果あり・数値未判明",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "黄金の林檎",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": null,
+          "active": null,
+          "note": "低下効果あり・数値未判明",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "酒代代わりの大薪束",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": null,
+          "active": null,
+          "note": "低下効果あり・数値未判明",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "同盟軍の特大槍",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": null,
+          "active": null,
+          "note": "低下効果あり・数値未判明",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "熱心な仕事者の上着",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": null,
+          "active": null,
+          "note": "低下効果あり・数値未判明",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "茨の王レヴェイエ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 7,
+          "active": 7,
+          "note": "+0時は6.50。ほかの強化段階は補間しない",
+          "strength": "unspecified",
+          "source": 939,
+          "byOverlap": {
+            "0": {
+              "base": 6.5,
+              "active": 6.5
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "魔法怪盗 ロルト",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": null,
+          "note": "+0時の数値のみ確認。時間条件",
+          "strength": "unspecified",
+          "source": 939,
+          "byOverlap": {
+            "0": {
+              "base": 4.8,
+              "active": 7.8
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "スキュラ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 7,
+          "active": -2,
+          "note": "SS使用回数による弱体時（7−9）",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "竜駆る乙女 レダ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4,
+          "active": 10,
+          "note": "成長後の追加分は概算。旧版の11〜12は使用しない",
+          "strength": "unspecified",
+          "source": 939,
+          "approximate": true,
+          "approximateStates": [
+            "active"
+          ]
+        }
+      }
+    },
+    {
+      "name": "木こりのバウアー",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 8,
+          "active": 8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "月守りの帝",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 8,
+          "active": 8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "ss": {
+          "base": 9,
+          "active": 9,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "マッチ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 14.8,
+          "active": 14.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "純白騎士オーガスタス",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 14.8,
+          "active": 14.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "獅子心王",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "悪魔を暴く者 ルチア",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 10.2,
+          "active": 10.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "伊勢",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 10.2,
+          "active": 10.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "冒険者シンドバッド",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 10.2,
+          "active": 10.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "ss": {
+          "base": 3,
+          "active": 3,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "グランマ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 16.14,
+          "active": 16.14,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ウェンディ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 14.2,
+          "active": 14.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "黒魔女エスメラルダ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 14.2,
+          "active": 14.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ヴォルフ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 14.2,
+          "active": 14.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "占い師ポーラ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 14.2,
+          "active": 14.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "ss": {
+          "base": 8.5,
+          "active": 8.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "星のエト＆金のレナ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 9.8,
+          "active": 9.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "ss": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "猪八戒",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 9.8,
+          "active": 9.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "武神 関羽",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 9.8,
+          "active": 9.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "慌て者の弟子 デュカ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 9.8,
+          "active": 9.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        },
+        "ss": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "幽霊女王 お岩",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 19.7,
+          "active": 19.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "亡霊の怨念刀",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.5,
+          "active": 3.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "名付け親の鎌",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 6,
+          "active": 6,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ルビーの剣",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 6,
+          "active": 6,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "海の重石",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 6,
+          "active": 6,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "トランプ兵の槍",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 12,
+          "active": 12,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "刀狩りの槍",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 12,
+          "active": 12,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "狂いし教王の東洋剣",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 7.8,
+          "active": 7.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "金の斧",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 15.8,
+          "active": 15.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "大鷲落としの弓",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 15.8,
+          "active": 15.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "白騎士の槍",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 12,
+          "active": 12,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "鶴織の着物＋",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 8.3,
+          "active": 8.3,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "共鳴る三供臣の獣面",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 3.7,
+          "active": 3.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "重い石鉢",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 5.8,
+          "active": 5.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "イラクサの鎖かたびら",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 5.8,
+          "active": 5.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ガンマンのマント",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 5.8,
+          "active": 5.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "空の矢筒",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 5.8,
+          "active": 5.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "錆びた錨",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 11.7,
+          "active": 11.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "スス汚れたランプ",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 11.7,
+          "active": 11.7,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "高額な錫杖",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 14.2,
+          "active": 14.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "赤熱した直槍",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 8.8,
+          "active": 8.8,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "小さな少女の糸車",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 7.2,
+          "active": 7.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "呪われしカエルの涙",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 7.2,
+          "active": 7.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "十二天将 玄武",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 10.5,
+          "active": 10.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "１２を司る者ベネディ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.85,
+          "active": 4.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "髪狩り魔女ゴーデル",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 4.85,
+          "active": 4.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "幸福王子 ワイルド",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 9,
+          "active": 9,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "火精ジャッカランタン",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 9,
+          "active": 9,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "灰狼フェンリル",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 9,
+          "active": 9,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "覚醒めの勇者ヴァラー",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3,
+          "active": 3,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "陽気なソレイユ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3,
+          "active": 3,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "破られた秘匿 青髭",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3,
+          "active": 3,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "童話を裁く者エクサ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 3,
+          "active": 3,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "剛拳はつせ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.65,
+          "active": 5.65,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "童話の語り人 吉四六",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.65,
+          "active": 5.65,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "妖精女王グロリアーナ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.65,
+          "active": 5.65,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "鬼狩人 源頼光",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "氷雪刀 雪曇",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "海の魔女セイレーン",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "狼群の子 モウグリ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ラ・ファータ",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 8.5,
+          "active": 8.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "王子",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 8.5,
+          "active": 8.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "異国の王子ファンク",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 8.5,
+          "active": 8.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "空を駆けるマレク",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "大願成就 雪曇",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ネレイス",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "伽倻",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "ハッピー仮装 お妙",
+      "kind": "soul",
+      "stats": {
+        "ss": {
+          "base": 5.5,
+          "active": 5.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "福結びの枡",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 5.35,
+          "active": 5.35,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "礼を込めし小人装束",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 2.65,
+          "active": 2.65,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "耳隠しの大きな帽子",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 2.65,
+          "active": 2.65,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "予言されし災禍の糸車",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 2,
+          "active": 2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "猪殺しの狩衣",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 2,
+          "active": 2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "いたずらな恋心の弓",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 8.85,
+          "active": 8.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "竜騎兵の銃",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 8.85,
+          "active": 8.85,
+          "note": "",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "遙かなる年を経た猟銃",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 2,
+          "active": 7,
+          "note": "レベルアップ後の一時強化",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "緋髪斬りの短剣",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 9,
+          "active": 5,
+          "note": "SS使用による弱体を含む",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "泡沫の姫の短剣＋",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 4,
+          "active": 7,
+          "note": "レベルアップ後の一時強化",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "枯れ木に吹いた桜花",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": 3.15,
+          "active": 6.15,
+          "note": "停止条件",
+          "strength": "unspecified",
+          "source": 939
+        }
+      }
+    },
+    {
+      "name": "金の小判溢れる大臼",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": null,
+          "note": "最大成長時の特殊分。基本SSなしと公式文から確認できる時だけ合計に反映",
+          "strength": "unspecified",
+          "source": 939,
+          "specialDelta": 6
+        }
+      }
+    },
+    {
+      "name": "笑わずの十二百合",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": null,
+          "note": "最大成長時の特殊分。基本SSなしと公式文から確認できる時だけ合計に反映",
+          "strength": "unspecified",
+          "source": 939,
+          "specialDelta": 6
+        }
+      }
+    },
+    {
+      "name": "青の占星術師のヴェール",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": null,
+          "note": "最大成長時の特殊分。基本SSなしと公式文から確認できる時だけ合計に反映",
+          "strength": "unspecified",
+          "source": 939,
+          "specialDelta": 7.2
+        }
+      }
+    },
+    {
+      "name": "虹を映す勇気の羽",
+      "kind": "assist",
+      "stats": {
+        "ss": {
+          "base": null,
+          "active": null,
+          "note": "特殊分7.5〜8の上端を採用。森の外を仮定",
+          "strength": "unspecified",
+          "source": 939,
+          "specialDelta": 8,
+          "approximate": true,
+          "approximateStates": [
+            "active"
+          ]
+        }
+      }
+    },
+    {
+      "name": "家精ブラウニー",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 5.2,
+          "active": 5.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ジャジーなカッツェ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 5.2,
+          "active": 5.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "炎精サラマンデル",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 5.2,
+          "active": 5.2,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "舌抜き鬼婆",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 9.67,
+          "active": 9.67,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "世界一の薔薇 アマダ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.17,
+          "active": 6.17,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "美徳の七精霊レーゲン",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 10.4,
+          "active": 10.4,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ゴルディロックス",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 10.4,
+          "active": 10.4,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ウィリアム・テル",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 10.4,
+          "active": 10.4,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ベオウルフ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 10.4,
+          "active": 10.4,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "凍みる心 カイ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 12.5,
+          "active": 12.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "犬飼健",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 12.5,
+          "active": 12.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "楽々森彦",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 12.5,
+          "active": 12.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "溶かす心 ゲルダ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 12.5,
+          "active": 12.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "スミー",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 12.75,
+          "note": "特殊効果最大時の合計",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "ファントム・エリック",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 0,
+          "active": 13,
+          "note": "特殊効果最大時の合計",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "星咲 あかり",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 16.5,
+          "note": "特殊効果最大時の合計",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "少彦名",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 18.66,
+          "note": "特殊効果最大時の合計",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "宣穆皇后 張春華",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 6.26,
+          "active": 18.66,
+          "note": "特殊効果最大時の合計",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "龍宮の舞妓 おタイ",
+      "kind": "soul",
+      "stats": {
+        "ds": {
+          "base": 8.2,
+          "active": 22.27,
+          "note": "特殊効果最大時の合計",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "神与の宝杖",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.42,
+          "active": 4.42,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "宣告送りの鎌",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.42,
+          "active": 4.42,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "英雄のクロスボウ",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 9,
+          "active": 9,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "勇気ある者の槍",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 9,
+          "active": 9,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "宴会好きな鬼の太鼓",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 9,
+          "active": 9,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "五光の龍玉",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 10.33,
+          "active": 10.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "冷気封じの帽子",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 10.33,
+          "active": 10.33,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "魔眼球",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 7.5,
+          "active": 7.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "綺麗なつぼみ",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 7.5,
+          "active": 7.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "処刑人の東洋刀",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 7.5,
+          "active": 7.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "あかがね色の書",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.75,
+          "active": 4.75,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "幸を呼ぶ貧乏神の草鞋",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.75,
+          "active": 4.75,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "錆びついた指輪",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.75,
+          "active": 4.75,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "傲慢な王女の服",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 4.75,
+          "active": 4.75,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "使いこまれた糸切り鋏",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "編み物の精の編み棒",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "収縮自在の扇子",
+      "kind": "assist",
+      "stats": {
+        "ds": {
+          "base": 9.5,
+          "active": 9.5,
+          "note": "",
+          "strength": "unspecified",
+          "source": 778
+        }
+      }
+    },
+    {
+      "name": "先代の魔女アグニ",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 3.33,
+          "active": 20,
+          "note": "時間経過の最大成長を仮定",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "マッチ売りのスピカ",
+      "kind": "soul",
+      "stats": {
+        "skill": {
+          "base": 1.67,
+          "active": 18.33,
+          "note": "攻撃による最大成長を仮定",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "祀られし化生の殺生石",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 1.67,
+          "active": 29.17,
+          "note": "森の中での追加効果込み",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "燃え盛る製鉄の鍋",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 3.33,
+          "note": "WS使用後",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    },
+    {
+      "name": "噂の留学生の服",
+      "kind": "assist",
+      "stats": {
+        "skill": {
+          "base": 0,
+          "active": 24.17,
+          "note": "レベルアップ後。旧27.5ではなく修正後の値",
+          "strength": "unspecified",
+          "source": 788
+        }
+      }
+    }
+  ]
+}
