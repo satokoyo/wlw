@@ -317,11 +317,11 @@ test('other equipped cards follow recommendations, with no duplicates or ineligi
  assert.deepEqual(leadingCards([unused],current,slots),[current]);
 });
 
-test('share code fits 43 characters for 17 slots and detects corruption',()=>{
+test('share code fits 49 characters for 17 slots and detects corruption',()=>{
  const {SHARE_SLOTS,encodeBuild,decodeBuild,validateShareDictionary}=require('../src/wonder-deck.js');
  const data=require('../data/share-cards.json');validateShareDictionary(data);
  const used=new Set();const slots=SHARE_SLOTS.map(s=>{const c=data.cards.find(c=>!used.has(c.id)&&!slotRule({...s,editable:true},{...c,owned:true},'2'));assert.ok(c);used.add(c.id);return {...s,id:c.id,editable:true};});
- const code=encodeBuild('2',slots,data);assert.equal(code.length,43);
+ const code=encodeBuild('2',slots,data);assert.equal(code.length,49);
  assert.deepEqual(decodeBuild(code,data).slots.map(({type,slot,id})=>({type,slot,id})),slots.map(({type,slot,id})=>({type,slot,id})));
  assert.equal(decodeBuild(code,data).cast,'2');
  assert.throws(()=>decodeBuild(code.slice(0,-1),data));
@@ -396,4 +396,11 @@ test('X intent contains the exact user template, escaped as one query parameter'
  assert.equal(url.searchParams.get('text'),`wlwの「${name}」のビルドだよ\n${code}\n#WONDERLANDDECK https://satokoyo.github.io/wlw/`);
  assert.equal([...url.searchParams].length,1);
  assert.ok(new URL(sharePostURL('A&B #日本語',code)).searchParams.get('text').includes('A&B #日本語'));
+});
+
+test('W2 carries a six-character build name and protects it with checksum',()=>{
+ const {encodeBuild,decodeBuild}=require('../src/wonder-deck.js'),data=require('../data/share-cards.json');const slots=[{type:'assist',slot:4,id:null,editable:true}];
+ const code=encodeBuild(2,slots,data,'全国対戦用壱');assert.equal(decodeBuild(code,data).name,'全国対戦用壱');
+ assert.throws(()=>decodeBuild(code.replace('全国','対戦'),data));assert.throws(()=>encodeBuild(2,slots,data,'一二三四五六七'));
+ assert.equal(decodeBuild(encodeBuild(2,slots,data,'A.B'),data).name,'A.B');
 });

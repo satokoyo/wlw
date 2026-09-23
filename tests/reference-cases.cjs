@@ -6,7 +6,7 @@ test('reference data validates; all reviewed entries have fixed public source an
  const index=referenceIndex(data);assert.equal(index.size,data.cards.length);
  assert.ok(data.cards.length>=180);
  for(const row of data.cards){assert.ok(referenceFor(row,index));for(const v of Object.values(row.stats)){assert.ok([939,778,788,769,945,1005,984].includes(v.source));assert.equal(v.strength ?? data.defaults.strength,'unspecified');}}
- assert.deepEqual({...JSON.parse(read('data/reference-stats.json')),acquisition:JSON.parse(read('data/acquisition.json'))},JSON.parse(read('dist/reference-stats-1.5.0.json')));
+ assert.deepEqual({...JSON.parse(read('data/reference-stats.json')),acquisition:JSON.parse(read('data/acquisition.json'))},JSON.parse(read('dist/reference-stats-1.5.1.json')));
 });
 test('exact name binding normalizes widths and whitespace, separates kinds and refuses ambiguity',()=>{
  const index=referenceIndex(data);
@@ -44,10 +44,10 @@ test('short loader locks duplicate launches and resets on error/timeout',()=>{
  l.script.onerror();assert.equal(l.window.__wonderDeckLoading,undefined);assert.equal(l.alerts.length,1);l.run();assert.notEqual(l.script,first);l.timeout();assert.equal(l.window.__wonderDeckLoading,undefined);
 });
 test('loader preserves an existing same-version UI and has matching integrity for the versioned script',()=>{
- const l=loader();let shown=0;l.window.__wonderDeck={version:'1.5.0',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
+ const l=loader();let shown=0;l.window.__wonderDeck={version:'1.5.1',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
  delete l.window.__wonderDeck;l.run();
- assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.5.0.js');
- assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.5.0.js')).digest('base64'));
+ assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.5.1.js');
+ assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.5.1.js')).digest('base64'));
  assert.equal(l.script.crossOrigin,'anonymous');assert.ok(code.length<1600);
 });
 
