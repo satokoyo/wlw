@@ -4,7 +4,7 @@
 /* WonderLandDeck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.5.1';
+  const VERSION = '1.5.2';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
@@ -295,8 +295,13 @@
   }
   function buildName(value){const name=String(value||'').trim().normalize('NFC');if([...name].length>6 || /[\x00-\x1f\x7f-\x9f]/.test(name))throw Error('ビルド名は改行なしで最大6文字です');return name;}
   const namedCRC=text=>shareCRC([...new TextEncoder().encode(text)].map(n=>n.toString(2).padStart(8,'0')).join('')).toString(16).padStart(4,'0');
-  function encodeBuild(cast,slots,data,name=''){const body='W2'+encodeBuildV1(cast,slots,data).slice(2)+'.'+buildName(name);return body+'.'+namedCRC(body);}
-  function decodeBuild(code,data){code=String(code).trim();if(code.startsWith('W1'))return {...decodeBuildV1(code,data),name:''};const match=code.match(/^W2([A-Za-z0-9_-]{7,41})\.(.*)\.([a-f0-9]{4})$/u);if(!match || namedCRC(code.slice(0,-5))!==match[3])throw Error('共有コードまたはビルド名が破損しています');return {...decodeBuildV1('W1'+match[1],data),name:buildName(match[2])};}
+  function encodeBuildName(name){const bits=[...new TextEncoder().encode(buildName(name))].map(n=>n.toString(2).padStart(8,'0')).join('');return (bits.padEnd(Math.ceil(bits.length/6)*6,'0').match(/.{6}/g)||[]).map(b=>SHARE_ALPHABET[parseInt(b,2)]).join('');}
+  function decodeBuildName(value){
+    const bits=[...value].map(c=>SHARE_ALPHABET.indexOf(c).toString(2).padStart(6,'0')).join('');
+    try{const name=new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from((bits.match(/.{8}/g)||[]).map(b=>parseInt(b,2))));if(encodeBuildName(name)!==value)throw Error();return name;}catch(e){throw Error('ビルド名の符号化が不正です');}
+  }
+  function encodeBuild(cast,slots,data,name=''){const body='W3'+encodeBuildV1(cast,slots,data).slice(2)+'.'+encodeBuildName(name);return body+'.'+namedCRC(body);}
+  function decodeBuild(code,data){code=String(code).trim();if(code.startsWith('W1'))return {...decodeBuildV1(code,data),name:''};const match=code.match(/^W([23])([A-Za-z0-9_-]{7,41})\.(.*)\.([a-f0-9]{4})$/u);if(!match || namedCRC(code.slice(0,-5))!==match[4])throw Error('共有コードまたはビルド名が破損しています');if(match[1]==='3'&&!/^[A-Za-z0-9_-]{0,32}$/.test(match[3]))throw Error('ビルド名の符号化が不正です');return {...decodeBuildV1('W1'+match[2],data),name:buildName(match[1]==='3'?decodeBuildName(match[3]):match[3])};}
   function planImportOperations(actual,rows,catalog,cast){
     const state=actual.map(s=>({...s})),operations=[];
     const lookup=id=>catalog.get(id)||rows.find(r=>r.card?.id===id)?.card;
@@ -583,7 +588,7 @@
   async function openShare(mode){
     if(!engine || engine.locked || engine.loading || shareBusy)return;
     $('.app-menu').open=false;sharePlan=null;
-    if(mode==='import'){shareFrame('ビルドをインポート','<label>共有コード<textarea id="share-code" rows="3" spellcheck="false" placeholder="W2…"></textarea></label><p>キャスト・構成を確認してから反映します。未所持カードは空欄にします。</p><button class="primary" data-action="share-preview">構成を確認</button>');shareDialog.querySelector('textarea').focus();return;}
+    if(mode==='import'){shareFrame('ビルドをインポート','<label>共有コード<textarea id="share-code" rows="3" spellcheck="false" placeholder="W3…"></textarea></label><p>キャスト・構成を確認してから反映します。未所持カードは空欄にします。</p><button class="primary" data-action="share-preview">構成を確認</button>');shareDialog.querySelector('textarea').focus();return;}
     shareFrame('ビルドをエクスポート','<p>サーバーの最新構成から共有コードを作成しています…</p>');setShareBusy(true);
     try{const cast=engine.cast,data=await getShareData(),deck=await api.deck(cast),code=encodeBuild(cast,slotsOf(deck),data);shareExport={cast,slots:slotsOf(deck),data};
       const name=engine.castName||castList.find(c=>c.id===cast)?.name||'キャスト '+cast;
@@ -642,7 +647,7 @@
   async function loadReference(){
     const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
     try{
-      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.5.1.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.5.2.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       const data=await response.json(),index=referenceIndex(data);
       // Only fixed, reviewed source links may be rendered.

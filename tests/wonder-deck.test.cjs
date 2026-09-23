@@ -398,9 +398,18 @@ test('X intent contains the exact user template, escaped as one query parameter'
  assert.ok(new URL(sharePostURL('A&B #日本語',code)).searchParams.get('text').includes('A&B #日本語'));
 });
 
-test('W2 carries a six-character build name and protects it with checksum',()=>{
+test('W3 carries a six-character build name and protects it with checksum',()=>{
  const {encodeBuild,decodeBuild}=require('../src/wonder-deck.js'),data=require('../data/share-cards.json');const slots=[{type:'assist',slot:4,id:null,editable:true}];
  const code=encodeBuild(2,slots,data,'全国対戦用壱');assert.equal(decodeBuild(code,data).name,'全国対戦用壱');
- assert.throws(()=>decodeBuild(code.replace('全国','対戦'),data));assert.throws(()=>encodeBuild(2,slots,data,'一二三四五六七'));
+ assert.throws(()=>decodeBuild(code.replace('W3','W2'),data));assert.throws(()=>encodeBuild(2,slots,data,'一二三四五六七'));
  assert.equal(decodeBuild(encodeBuild(2,slots,data,'A.B'),data).name,'A.B');
+});
+
+test('W3 names are ASCII-only and round-trip Japanese and emoji; old W2 stays readable',()=>{
+ const {encodeBuild,decodeBuild,SHARE_SLOTS}=require('../src/wonder-deck.js'),data=require('../data/share-cards.json');
+ const slots=SHARE_SLOTS.map(s=>({...s,id:null,editable:true}));
+ for(const name of ['全国','全国対戦用壱','é.A-_','😀😀😀😀😀😀','']){const code=encodeBuild(2,slots,data,name);assert.match(code,/^W3[A-Za-z0-9_.-]+$/);assert.ok(code.length<=81);assert.equal(decodeBuild(code,data).name,name);}
+ const checksum=text=>{let crc=65535;for(const n of new TextEncoder().encode(text))for(let i=7;i>=0;i--){const high=(crc>>>15)^((n>>>i)&1);crc=(crc<<1)&65535;if(high)crc^=0x1021;}return crc.toString(16).padStart(4,'0');};
+ const prefix=encodeBuild(2,slots,data).split('.')[0];const old='W2'+prefix.slice(2)+'.全国';assert.equal(decodeBuild(old+'.'+checksum(old),data).name,'全国');
+ for(const encoded of ['_w','AB','A','!!!!']){const body=prefix+'.'+encoded;assert.throws(()=>decodeBuild(body+'.'+checksum(body),data),/符号化/);}
 });
