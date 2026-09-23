@@ -309,3 +309,10 @@ test('acquisition resolves names, craft fallback, expiry, and escapes data',()=>
  const html=acquisitionHTML({name:'test'},malicious);assert.ok(!html.includes('<script>'));assert.ok(!html.includes('javascript:'));
  const names=data.cards.map(r=>r.name.normalize('NFKC').replace(/\s/g,''));assert.equal(new Set(names).size,names.length);
 });
+
+test('other equipped cards follow recommendations, with no duplicates or ineligible additions',()=>{
+ const current={id:id(1)},recommended={id:id(2),rank:1,recommendationOrder:0},other={id:id(3)},unused={id:id(4)};
+ const slots=[{id:id(3)},{id:id(1)},{id:id(2)},{id:id(99)},{id:id(3)}];
+ assert.deepEqual(leadingCards([other,unused,recommended],current,slots).map(c=>c.id),[id(1),id(2),id(3)]);
+ assert.deepEqual(leadingCards([unused],current,slots),[current]);
+});

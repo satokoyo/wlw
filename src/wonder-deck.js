@@ -4,7 +4,7 @@
 /* Wonder Deck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.4.4';
+  const VERSION = '1.4.5';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
@@ -191,7 +191,10 @@
   const categoryName = key => LABEL[key] || ((key.startsWith('skill:')?'スキル・':'')+(CAT[key.split(':')[1]] || '分類未取得'));
   const masterActivation = c => /サモン(?:待機)?状態/.test(effectText(c.effect)) ? 'サモン' : /即時発動/.test(effectText(c.effect)) ? '即時' : '';
   const cardCategoryText = c => c.kind==='assist' ? CAT[c.category] || '分類未取得' : c.kind==='skill' ? 'スキル・'+(CAT[c.category] || '分類未取得') : c.kind==='mskill' ? 'マスタースキル'+(masterActivation(c)?'・'+masterActivation(c):'') : LABEL[c.kind] || '種別未取得';
-  const leadingCards = (cards,current) => [...(current?[current]:[]),...recommendedCards(cards).filter(c=>c.id!==current?.id)];
+  function leadingCards(cards,current,slots=[]) {
+    const seen=new Set(), byID=new Map(cards.map(c=>[c.id,c]));
+    return [...(current?[current]:[]),...recommendedCards(cards),...slots.map(s=>byID.get(s.id)).filter(Boolean)].filter(c=>{if(seen.has(c.id))return false;seen.add(c.id);return true;});
+  }
   const levelOrder = c => c.kind==='mskill' ? 98 : Number.isFinite(c.level) && c.level>0 ? c.level : 99;
   const kindOrder = c => c.kind==='skill'?0:c.kind==='mskill'?2:1;
   const levelLabel = c => c.kind==='skill' ? '通常スキル' : c.kind==='mskill' ? 'マスタースキル（使用レベルなし）' : levelOrder(c)===99 ? '使用レベル未取得' : 'Lv.'+c.level;
@@ -492,7 +495,7 @@
   async function loadReference(){
     const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
     try{
-      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.4.4.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.4.5.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       const data=await response.json(),index=referenceIndex(data);
       // Only fixed, reviewed source links may be rendered.
@@ -543,15 +546,16 @@
     const unavailable=unavailableReason(c);
     const equipped=e.slots.some(s=>s.id===c.id);
     const current=e.current?.id===c.id;
+    const otherSlot=e.slots.find(s=>s.id===c.id);
     const state=!c.owned?'未所持':unavailable?'情報未取得':c.viewOnly && !equipped?'閲覧用':'';
     const stats=[c.kind!=='mskill' && c.level?'Lv.'+c.level:'',RARITY[c.rarity]||'',c.owned?overlap(c):''].filter(Boolean).join(' · ');
-    return `<button class="card ${e.selected?.id===c.id?'selected':''} ${equipped?'equipped':''} ${unavailable?'unowned':''}" data-action="card" data-value="${c.id}" aria-pressed="${e.selected?.id===c.id}" aria-label="${esc(c.name)}${unavailable?'（'+esc(unavailable)+'）':'の詳細'}${equipped?'（装備中）':''}" title="${esc(unavailable || c.name+' / '+cardCategoryText(c)+' / '+stats)}" ${unavailable?'disabled':''}>${current?'<span class="rank">セット中</span>':c.rank?`<span class="rank">おすすめ ${c.rank}</span>`:''}<span class="card-art"><span class="card-check" aria-hidden="true" title="装備中">✅</span><img loading="lazy" decoding="async" src="${img(c)}" alt=""></span><span class="card-caption"><b>${esc(c.name)}</b><span class="meta category">${esc(cardCategoryText(c))}</span><span class="meta">${esc([stats,state].filter(Boolean).join(" · "))}</span><span class="meta ref-line">${esc(referenceLine(c))}</span></span></button>`;
+    return `<button class="card ${e.selected?.id===c.id?'selected':''} ${equipped?'equipped':''} ${unavailable?'unowned':''}" data-action="card" data-value="${c.id}" aria-pressed="${e.selected?.id===c.id}" aria-label="${esc(c.name)}${unavailable?'（'+esc(unavailable)+'）':'の詳細'}${equipped?'（装備中）':''}" title="${esc(unavailable || c.name+' / '+cardCategoryText(c)+' / '+stats)}" ${unavailable?'disabled':''}>${current?'<span class="rank">セット中</span>':c.rank?`<span class="rank">おすすめ ${c.rank}</span>`:otherSlot?`<span class="rank">${esc(slotLabel(otherSlot))}に装備中</span>`:''}<span class="card-art"><span class="card-check" aria-hidden="true" title="装備中">✅</span><img loading="lazy" decoding="async" src="${img(c)}" alt=""></span><span class="card-caption"><b>${esc(c.name)}</b><span class="meta category">${esc(cardCategoryText(c))}</span><span class="meta">${esc([stats,state].filter(Boolean).join(" · "))}</span><span class="meta ref-line">${esc(referenceLine(c))}</span></span></button>`;
   }
   function renderCards(){
     if(!engine)return;
     const e=engine, cacheKey=JSON.stringify(filter)+'|'+e.cast+'|'+e.loading+'|'+(e.current?.id || '')+'|'+(e.slot?slotKey(e.slot):'');
     const changed=listRef!==e.cards || listFilter!==cacheKey || visible<drawn;
-    if(changed){listRef=e.cards;listFilter=cacheKey;filteredCache=e.loading?[]:filterCards(e.cards,filter,e.cast);drawn=0;$('#card-grid').replaceChildren();const recommended=leadingCards(filteredCache,e.loading?null:e.currentDetail);$('#recommendations').hidden=!recommended.length;$('#recommend-grid').innerHTML=recommended.map(c=>cardMarkup(c,e)).join('');}
+    if(changed){listRef=e.cards;listFilter=cacheKey;filteredCache=e.loading?[]:filterCards(e.cards,filter,e.cast);drawn=0;$('#card-grid').replaceChildren();const recommended=leadingCards(filteredCache,e.loading?null:e.currentDetail,e.slots);$('#recommendations').hidden=!recommended.length;$('#recommend-grid').innerHTML=recommended.map(c=>cardMarkup(c,e)).join('');}
     const list=filteredCache;
     $('#count').textContent=e.loading?'読み込み中…':list.length+'枚';
     const tags=[];if(filter.q)tags.push('検索：'+filter.q);
