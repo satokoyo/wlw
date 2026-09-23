@@ -3,7 +3,7 @@
  */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {leadingCards,VERSIONS,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('../src/wonder-deck.js');
+const {acquisitionFor,acquisitionHTML,leadingCards,VERSIONS,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('../src/wonder-deck.js');
 const id=n=>n.toString(16).padStart(32,'0');
 const raw=(n,ct=2,lv=6)=>({ci:id(n),na:'Card '+n,ca:ct===1?1:7,ct,lv,ol:10,te:'assbsfcrhpufs',ra:3,fi:8,gr:[5]});
 const card=(n,kind='assist',level=6)=>({id:id(n),kind,level,owned:true});
@@ -294,4 +294,18 @@ test('current slot card leads recommendations without duplicates or changing the
  assert.deepEqual(leadingCards([a,b],current).map(c=>c.id),[id(1),id(2)]);
  assert.deepEqual(leadingCards([],current),[current]);
  assert.deepEqual(leadingCards([a],null),[a]);
+});
+
+test('acquisition resolves names, craft fallback, expiry, and escapes data',()=>{
+ const data=require('../data/acquisition.json');
+ assert.match(acquisitionFor({name:'三銃士　アラミス'},data)[0].method,/リーフ/);
+ assert.equal(acquisitionFor({name:'心探しの新兵の銃'},data)[0].base,'古びた歩兵銃');
+ assert.equal(acquisitionFor({name:'unknown',versions:[50]},data)[0].method,'カードクラフト');
+ assert.deepEqual(acquisitionFor({name:'unknown',versions:[20]},data),[]);
+ assert.match(acquisitionHTML({name:'海の魔女セイレーン'},data),/期限切れ/);
+ assert.match(acquisitionHTML({name:'unknown'},data),/未収録/);
+ assert.match(acquisitionHTML({},null),/未取得/);
+ const malicious={...data,cards:[{name:'test',methods:[{method:'<script>',source:'javascript:alert(1)'}]}]};
+ const html=acquisitionHTML({name:'test'},malicious);assert.ok(!html.includes('<script>'));assert.ok(!html.includes('javascript:'));
+ const names=data.cards.map(r=>r.name.normalize('NFKC').replace(/\s/g,''));assert.equal(new Set(names).size,names.length);
 });

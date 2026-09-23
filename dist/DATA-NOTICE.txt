@@ -54,3 +54,7 @@ nameとkindの一致で参照します。文字幅と空白のみ正規化し、
 - https://w.atwiki.jp/wlws/pages/945.html
 - https://w.atwiki.jp/wlws/pages/1005.html
 - https://w.atwiki.jp/wlws/pages/984.html
+
+## 入手方法
+
+`acquisition.json` は指定Wiki（943・481・769）で確認した入手経路の事実を独自形式で記録します。カード名は空白・全半角を正規化して照合。素材購入と完成品購入を区別し、期限切れは明記します。未収録は入手不可を意味しません。クラフト分類50には共通案内を表示します。販売継続を保証せず、価格は保持しません。配信時は参考値JSONのacquisitionに同梱し、追加通信は発生しません。

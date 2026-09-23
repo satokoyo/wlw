@@ -4,7 +4,7 @@
 /* Wonder Deck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.4.3';
+  const VERSION = '1.4.4';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
@@ -54,6 +54,20 @@
     return c;
   }
   // Reference data is deliberately independent of official eligibility / save state.
+  function acquisitionFor(card,data) {
+    if(data?.schemaVersion!==1 || !Array.isArray(data.cards))return [];
+    const row=data.cards.find(r=>referenceName(r.name)===referenceName(card.name));
+    if(row)return row.methods;
+    return card.versions?.some(v=>Number(v)===data.craft?.version)?[data.craft]:[];
+  }
+  function acquisitionHTML(card,data) {
+    if(!data)return '<section class="reference acquisition"><strong>入手方法</strong><p>入手方法データは未取得です。</p></section>';
+    const methods=acquisitionFor(card,data);
+    return '<section class="reference acquisition"><strong>入手方法（参考）</strong>'+ (methods.length?methods.map(m=>{
+      const source=[943,481,769].includes(m.source)?` <a href="https://w.atwiki.jp/wlws/pages/${m.source}.html" target="_blank" rel="noopener noreferrer">出典</a>`:'';
+      return `<p>${m.status==='expired'?'【期限切れ】':''}${esc(m.method)}${m.base?'<br>素材：'+esc(m.base)+' ＋ フラグメント':''}${m.note?'<br>'+esc(m.note):''}${source}</p>`;
+    }).join(''):'<p>このカードの入手方法は未収録です。</p>')+'<small>確認日：'+esc(data.reviewedAt)+'。最新の提供状況はゲーム内・販売元で確認してください。</small></section>';
+  }
   const STAT_LABELS = {ss:'SS',ds:'DS',skill:'スキル'};
   const referenceName = name => norm(name).replace(/\s/g,'');
   function referenceIndex(data) {
@@ -387,7 +401,7 @@
     }
     dispose(){if(this.locked)return false;this.disposed=true;this.epoch++;return true;}
   }
-  if(typeof module==='object' && module.exports){module.exports={leadingCards,VERSIONS,referenceNoImpact,referenceCondition,referenceValue,referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
+  if(typeof module==='object' && module.exports){module.exports={acquisitionFor,acquisitionHTML,leadingCards,VERSIONS,referenceNoImpact,referenceCondition,referenceValue,referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
   if(location.origin!=='https://wonderland-wars.net' || !/^\/deck\/(index|deckchange)\.html$/.test(location.pathname)){alert('Wonder.NETのカード編集画面で実行してください。');return;}
   let resume=null;
   if(window.__wonderDeck){
@@ -478,7 +492,7 @@
   async function loadReference(){
     const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
     try{
-      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.4.3.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.4.4.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       const data=await response.json(),index=referenceIndex(data);
       // Only fixed, reviewed source links may be rendered.
@@ -563,7 +577,7 @@
     if(!c){detail.innerHTML='<div class="detail-title"><h2>カードの効果</h2><button data-action="detail-close">閉じる</button></div><div class="empty">デッキの枠、または一覧のカードを選んでください。</div>';return;}
     const why=e.reason(c), current=e.current;
     const equipped=e.slots.filter(s=>s.id===c.id).map(slotLabel);
-    detail.innerHTML=`<div class="detail-title"><h2>${esc(c.name)}</h2><button data-action="detail-close">閉じる</button></div><div class="detail-summary"><img class="portrait" src="${img(c)}" alt="${esc(c.name)}"><div class="data"><span>${esc(LABEL[c.kind])}</span>${c.level?`<span>使用可能 Lv.${c.level}</span>`:''}${c.rarity?`<span>${RARITY[c.rarity]||c.rarity}</span>`:''}<span>強化 ${esc(overlap(c))}</span>${c.mp!=null?`<span>MP ${c.mp}</span>`:''}${c.uses!=null?`<span>使用回数 ${c.uses}</span>`:''}${c.first!=null?`<span>初回CT ${c.first}</span>`:''}${c.next!=null?`<span>再使用CT ${c.next}</span>`:''}</div></div><div class="detail-body">${equipped.length?`<p class="muted">装備中：${esc(equipped.join(' ／ '))}</p>`:''}<div class="effect">${effectHTML(c.effect)}</div>${c.peculiar.map(r=>`<p class="muted">固有効果：${esc(r.na)}のみ適用</p>`).join('')}${c.boosts.length?`<p class="muted">強化対象：${esc(c.boosts.join('・'))}</p>`:''}${referenceDetail(c)}</div><div class="actions"><p class="reason">${esc(why || (c.equipped?'他枠に装備中です。公式の入れ替え処理で構成を更新します。':slotLabel(current)+'にセットします'))}</p><button class="primary" data-action="save" ${why?'disabled':''}>この枠にセット</button>${current?.editable && current.id?`<button data-action="remove" ${e.locked||e.loading?'disabled':''}>この枠のカードをはずす</button>`:''}</div>`;
+    detail.innerHTML=`<div class="detail-title"><h2>${esc(c.name)}</h2><button data-action="detail-close">閉じる</button></div><div class="detail-summary"><img class="portrait" src="${img(c)}" alt="${esc(c.name)}"><div class="data"><span>${esc(LABEL[c.kind])}</span>${c.level?`<span>使用可能 Lv.${c.level}</span>`:''}${c.rarity?`<span>${RARITY[c.rarity]||c.rarity}</span>`:''}<span>強化 ${esc(overlap(c))}</span>${c.mp!=null?`<span>MP ${c.mp}</span>`:''}${c.uses!=null?`<span>使用回数 ${c.uses}</span>`:''}${c.first!=null?`<span>初回CT ${c.first}</span>`:''}${c.next!=null?`<span>再使用CT ${c.next}</span>`:''}</div></div><div class="detail-body">${equipped.length?`<p class="muted">装備中：${esc(equipped.join(' ／ '))}</p>`:''}<div class="effect">${effectHTML(c.effect)}</div>${c.peculiar.map(r=>`<p class="muted">固有効果：${esc(r.na)}のみ適用</p>`).join('')}${c.boosts.length?`<p class="muted">強化対象：${esc(c.boosts.join('・'))}</p>`:''}${referenceDetail(c)}${acquisitionHTML(c,referenceData?.acquisition)}</div><div class="actions"><p class="reason">${esc(why || (c.equipped?'他枠に装備中です。公式の入れ替え処理で構成を更新します。':slotLabel(current)+'にセットします'))}</p><button class="primary" data-action="save" ${why?'disabled':''}>この枠にセット</button>${current?.editable && current.id?`<button data-action="remove" ${e.locked||e.loading?'disabled':''}>この枠のカードをはずす</button>`:''}</div>`;
   }
   function chooseCard(id){if(!engine || engine.loading)return;const c=engine.currentDetail?.id===id?engine.currentDetail:engine.cards.find(c=>c.id===id);if(unavailableReason(c))return;engine.selected=c;renderDetail();$$('.card').forEach(b=>{const selected=b.dataset.value===id;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});$('.detail').classList.add('open');$('.detail-backdrop').classList.add('open');$('.detail').scrollTop=0;}
   function close(){
