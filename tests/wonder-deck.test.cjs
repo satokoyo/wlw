@@ -3,7 +3,7 @@
  */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {VERSIONS,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('../src/wonder-deck.js');
+const {leadingCards,VERSIONS,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('../src/wonder-deck.js');
 const id=n=>n.toString(16).padStart(32,'0');
 const raw=(n,ct=2,lv=6)=>({ci:id(n),na:'Card '+n,ca:ct===1?1:7,ct,lv,ol:10,te:'assbsfcrhpufs',ra:3,fi:8,gr:[5]});
 const card=(n,kind='assist',level=6)=>({id:id(n),kind,level,owned:true});
@@ -287,4 +287,11 @@ test('master labels distinguish summon and immediate effects without changing ta
  assert.equal(cardCategoryText(b),'マスタースキル・即時');
  assert.equal(cardCategoryText({kind:'mskill',effect:''}),'マスタースキル');
  assert.equal(categoryKey(a),'mskill');assert.equal(categoryKey(b),'mskill');
+});
+
+test('current slot card leads recommendations without duplicates or changing their order',()=>{
+ const current={id:id(1),name:'current'},a={id:id(2),rank:1,recommendationOrder:0},b={...current,rank:2,recommendationOrder:1};
+ assert.deepEqual(leadingCards([a,b],current).map(c=>c.id),[id(1),id(2)]);
+ assert.deepEqual(leadingCards([],current),[current]);
+ assert.deepEqual(leadingCards([a],null),[a]);
 });
