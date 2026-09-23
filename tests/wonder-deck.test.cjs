@@ -316,3 +316,84 @@ test('other equipped cards follow recommendations, with no duplicates or ineligi
  assert.deepEqual(leadingCards([other,unused,recommended],current,slots).map(c=>c.id),[id(1),id(2),id(3)]);
  assert.deepEqual(leadingCards([unused],current,slots),[current]);
 });
+
+test('share code fits 43 characters for 17 slots and detects corruption',()=>{
+ const {SHARE_SLOTS,encodeBuild,decodeBuild,validateShareDictionary}=require('../src/wonder-deck.js');
+ const data=require('../data/share-cards.json');validateShareDictionary(data);
+ const used=new Set();const slots=SHARE_SLOTS.map(s=>{const c=data.cards.find(c=>!used.has(c.id)&&!slotRule({...s,editable:true},{...c,owned:true},'2'));assert.ok(c);used.add(c.id);return {...s,id:c.id,editable:true};});
+ const code=encodeBuild('2',slots,data);assert.equal(code.length,43);
+ assert.deepEqual(decodeBuild(code,data).slots.map(({type,slot,id})=>({type,slot,id})),slots.map(({type,slot,id})=>({type,slot,id})));
+ assert.equal(decodeBuild(code,data).cast,'2');
+ assert.throws(()=>decodeBuild(code.slice(0,-1),data));
+ assert.throws(()=>decodeBuild(code.slice(0,8)+(code[8]==='A'?'B':'A')+code.slice(9),data));
+ assert.throws(()=>encodeBuild(2,[{type:'assist',slot:4,id:id(900000),editable:true}],data),/未収録/);
+ assert.throws(()=>encodeBuild(2,[{type:'reserve',slot:8,id:null,editable:true}],data),/未対応/);
+ const fewer=slots.filter(s=>s.type!=='reserve');assert.equal(decodeBuild(encodeBuild(2,fewer,data),data).slots.length,9);
+ const partial=slots.map(s=>({...s,editable:s.type!=='reserve'||s.slot<3}));assert.equal(decodeBuild(encodeBuild(2,partial,data),data).slots.length,12);
+ const empty=slots.map(s=>({...s,id:null}));assert.ok(decodeBuild(encodeBuild(2,empty,data),data).slots.every(s=>s.id===null));
+});
+test('reserve availability handles missing arrays and boolean strings',()=>{
+ const deck=makeDeck();delete deck.reserve;assert.equal(slotsOf(deck).filter(s=>s.type==='reserve').length,0);
+ deck.reserve=[{sl:0,bs:'false'},{sl:1,bs:'true'},{sl:2,bs:0},{sl:3,bs:1}];
+ assert.deepEqual(slotsOf(deck).filter(s=>s.type==='reserve').map(s=>s.editable),[false,true,false,true]);
+});
+test('import sets directly, waits between writes, and verifies full configuration',async()=>{
+ const {prepareImport,applyImport}=require('../src/wonder-deck.js');const h=harness();await h.engine.changeCast('2');
+ const build={cast:'2',slots:[{type:'assist',slot:4,id:id(8),card:normalizeCard(raw(8),'deck')},{type:'assist',slot:9,id:id(9),card:normalizeCard(raw(9),'deck')}]};
+ const plan=await prepareImport(h.api,build,new Map());let waited=0;
+ assert.equal(h.calls.length,0);assert.deepEqual(plan.operations.map(s=>s.id),[id(8),id(9)]);
+ await applyImport(h.engine,plan,()=>{},async()=>{waited++});assert.equal(waited,1);assert.equal(h.calls.length,2);
+ assert.equal(h.decks['2'].assist[0].ci,id(8));assert.equal(h.decks['36'].assist[0].ci,id(36));
+});
+test('import leaves missing cards empty, skips locked or absent reserves',async()=>{
+ const {prepareImport,applyImport}=require('../src/wonder-deck.js');const h=harness();await h.engine.changeCast('2');
+ const plan=await prepareImport(h.api,{cast:'2',slots:[{type:'assist',slot:4,id:id(99),card:{name:'missing'}},{type:'reserve',slot:0,id:id(99),card:{name:'missing'}}]},new Map());
+ assert.equal(plan.rows[0].missing,true);assert.equal(plan.rows[0].id,null);assert.equal(plan.skipped.length,1);
+ await applyImport(h.engine,plan);assert.equal(h.decks['2'].assist[0].ci,null);assert.equal(h.decks['2'].reserve[0].ci,id(7));
+});
+test('import aborts before writing if preview is stale or removal is forbidden',async()=>{
+ const {prepareImport,applyImport}=require('../src/wonder-deck.js');const h=harness();await h.engine.changeCast('2');
+ const build=()=>({cast:'2',slots:[{type:'assist',slot:4,id:id(8),card:{name:'target'}}]});
+ const plan=await prepareImport(h.api,build(),new Map());h.decks['2'].assist[1].ci=id(99);
+ await assert.rejects(()=>applyImport(h.engine,plan),/変わりました/);assert.equal(h.calls.length,0);
+ h.api.permission=async()=>({remove:false});await assert.rejects(()=>prepareImport(h.api,{cast:'2',slots:[{type:'assist',slot:4,id:null}]},new Map()),/取り外し/);assert.equal(h.calls.length,0);
+});
+test('import stops on failed save and never retries uncertain writes',async()=>{
+ const {prepareImport,applyImport}=require('../src/wonder-deck.js');const h=harness();await h.engine.changeCast('2');
+ const plan=await prepareImport(h.api,{cast:'2',slots:[{type:'assist',slot:4,id:id(8),card:{name:'target'}}]},new Map());
+ let attempts=0;h.api.commit=async()=>{attempts++;throw Error('offline');};
+ await assert.rejects(()=>applyImport(h.engine,plan));assert.equal(attempts,1);assert.ok(h.engine.uncertain);
+});
+test('import detects another screen changing the deck during the interval',async()=>{
+ const {prepareImport,applyImport}=require('../src/wonder-deck.js');const h=harness();await h.engine.changeCast('2');
+ const plan=await prepareImport(h.api,{cast:'2',slots:[{type:'assist',slot:4,id:id(8),card:{name:'target'}},{type:'assist',slot:9,id:id(9),card:{name:'second'}}]},new Map());
+ await assert.rejects(()=>applyImport(h.engine,plan,()=>{},async()=>{h.decks['2'].assist[1].ci=id(99);}),/別の画面/);
+ assert.equal(h.calls.length,1);assert.equal(h.decks['2'].assist[1].ci,id(99));
+});
+
+test('direct swap completes two destinations with one write',()=>{
+ const {planImportOperations}=require('../src/wonder-deck.js');const actual=[{...slot('assist',4),id:id(4)},{...slot('assist',5),id:id(5)}];
+ const rows=[{...actual[0],id:id(5)},{...actual[1],id:id(4)}];
+ assert.equal(planImportOperations(actual,rows,new Map([[id(4),card(4)],[id(5),card(5)]]),'2').length,1);
+});
+test('planner orders valid swaps first and only releases when required',()=>{
+ const {planImportOperations}=require('../src/wonder-deck.js');
+ const actual=[{...slot('assist',4),id:id(4)},{...slot('assist',9),id:id(5)},{...slot('reserve',0),id:id(6)}];
+ const catalog=new Map([[id(4),card(4,'assist',1)],[id(5),card(5,'assist',6)],[id(6),card(6,'assist',6)]]);
+ const rows=[{...actual[0],id:id(5)},{...actual[1],id:id(6)},{...actual[2],id:id(4)}];
+ const ops=planImportOperations(actual,rows,catalog,'2');assert.equal(ops.length,2);assert.ok(ops.every(s=>s.id));assert.equal(ops[0].slot,9);
+});
+
+test('shared dictionary keeps existing codes compatible',()=>{
+ const {decodeBuild}=require('../src/wonder-deck.js');const fixture=require('./share-code-fixture.json');
+ const decoded=decodeBuild(fixture.code,require('../data/share-cards.json'));
+ assert.equal(decoded.cast,fixture.cast);assert.deepEqual(decoded.slots.map(({type,slot,id})=>({type,slot,id})),fixture.slots);
+});
+
+test('X intent contains the exact user template, escaped as one query parameter',()=>{
+ const {sharePostURL}=require('../src/wonder-deck.js');const name='ピーター・ザ・キッド',code='W1_abc-123';const url=new URL(sharePostURL(name,code));
+ assert.equal(url.origin,'https://twitter.com');assert.equal(url.pathname,'/intent/tweet');
+ assert.equal(url.searchParams.get('text'),`wlwの「${name}」のビルドだよ\n${code}\n#WONDERLANDDECK https://satokoyo.github.io/wlw/`);
+ assert.equal([...url.searchParams].length,1);
+ assert.ok(new URL(sharePostURL('A&B #日本語',code)).searchParams.get('text').includes('A&B #日本語'));
+});

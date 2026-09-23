@@ -1,0 +1,21 @@
+{
+  "cast": "2",
+  "slots": [
+    {
+      "type": "skill",
+      "slot": 1,
+      "id": "28618156e292495b4f68502349c336a6"
+    },
+    {
+      "type": "assist",
+      "slot": 4,
+      "id": "2304076fbf697b57c09418b5c7d35ce9"
+    },
+    {
+      "type": "reserve",
+      "slot": 0,
+      "id": null
+    }
+  ],
+  "code": "W1ApBAATJHgAfQm"
+}

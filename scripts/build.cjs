@@ -37,3 +37,6 @@ reference.acquisition=JSON.parse(fs.readFileSync(path.join(root,'data/acquisitio
 fs.writeFileSync(path.join(dist,'reference-stats-'+version+'.json'),JSON.stringify(reference)+'\n');
 fs.copyFileSync(path.join(root,'data/README.md'),path.join(dist,'DATA-NOTICE.txt'));
 console.log(JSON.stringify({sourceBytes:Buffer.byteLength(source),compactBytes:Buffer.byteLength(compact),bookmarkCharacters:bookmark.length}));
+
+const share=JSON.parse(fs.readFileSync(path.join(root,'data/share-cards.json'),'utf8'));
+fs.writeFileSync(path.join(dist,'share-cards-1.json'),JSON.stringify(share)+'\n');

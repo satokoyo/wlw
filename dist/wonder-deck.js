@@ -1,10 +1,10 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (c) 2026 satokoyo
  */
-/* Wonder Deck 1.0 — self-contained Wonder.NET deck editor. */
+/* WonderLandDeck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.4.5';
+  const VERSION = '1.5.0';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
@@ -164,7 +164,7 @@
   function slotsOf(deck) {
     return GROUPS.flatMap(group => (deck[group] || []).map(r => ({type:group === 'master' ? 'mskill' : group,
       slot:Number(r.sl), id:validID(r.ci) ? r.ci : null, overlap:r.lv, kind:TYPES[Number(r.ct)],
-      editable:!(group === 'skill' && Number(r.sl) === 0) && !(group === 'reserve' && !r.bs)})));
+      editable:!(group === 'skill' && Number(r.sl) === 0) && !(group === 'reserve' && ![true,1,'1','true'].includes(r.bs))})));
   }
   const slotKey = s => s.type + ':' + s.slot;
   const sameSlot = (a,b) => !!a && !!b && slotKey(a) === slotKey(b);
@@ -261,6 +261,104 @@
     });
     return {stars:values.map(v=>v===null?'？':v?'★':'☆').join(''),title:'装備構成の条件（各カードの使用可能レベル到達時）\n'+rules.map((r,i)=>(values[i]===null?'未判定':values[i]?'満たす':'不足')+'：'+r.text).join('\n')};
   }
+  // W1: cast(8), slot presence mask(17), present card indexes(12 each), CRC16.
+  // Dictionary indexes are append-only; zero means an empty slot.
+  const SHARE_SLOTS=[1,2,3,4,5,6,7,8,9].map(slot=>({type:slot<=3?'skill':slot===7?'soul':slot===8?'mskill':'assist',slot})).concat(Array.from({length:8},(_,slot)=>({type:'reserve',slot})));
+  const sharePostURL=(name,code)=>'https://twitter.com/intent/tweet?text='+encodeURIComponent(`wlwの「${name}」のビルドだよ\n${code}\n#WONDERLANDDECK https://satokoyo.github.io/wlw/`);
+  const SHARE_ALPHABET='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  const shareCRC=bits=>{let crc=65535;for(const bit of bits){const high=(crc>>>15)^Number(bit);crc=(crc<<1)&65535;if(high)crc^=0x1021;}return crc;};
+  function validateShareDictionary(data){
+    if(data?.schemaVersion!==1 || !Array.isArray(data.cards) || data.cards.length>4095)throw Error('共有辞書を取得できません。再読込してください');
+    const seen=new Set();for(const c of data.cards){if(!validID(c.id)||seen.has(c.id)||!['skill','assist','soul','mskill'].includes(c.kind)||typeof c.name!=='string')throw Error('共有辞書の形式が不正です');seen.add(c.id);}return data;
+  }
+  function encodeBuild(cast,slots,data){
+    validateShareDictionary(data);if(!/^\d+$/.test(String(cast))||Number(cast)>255)throw Error('未対応のキャストです');
+    const indexes=new Map(data.cards.map((c,i)=>[c.id,i+1]));
+    const active=slots.filter(s=>s.editable);if(active.some(s=>!SHARE_SLOTS.some(t=>sameSlot(s,t))))throw Error('未対応の枠があります。新版が必要です');
+    const ids=active.map(s=>s.id).filter(Boolean);if(new Set(ids).size!==ids.length)throw Error('カードの配置が重複しています');
+    let bits=Number(cast).toString(2).padStart(8,'0');const present=SHARE_SLOTS.map(t=>active.find(s=>sameSlot(s,t)));
+    bits+=present.map(Boolean).map(Number).join('');
+    for(const s of present)if(s){const n=s.id?indexes.get(s.id):0;if(n===undefined)throw Error('共有辞書に未収録のカードがあります：'+s.id);bits+=n.toString(2).padStart(12,'0');}
+    bits+=shareCRC(bits).toString(2).padStart(16,'0');bits=bits.padEnd(Math.ceil(bits.length/6)*6,'0');
+    return 'W1'+bits.match(/.{6}/g).map(b=>SHARE_ALPHABET[parseInt(b,2)]).join('');
+  }
+  function decodeBuild(code,data){
+    validateShareDictionary(data);code=String(code).trim();if(!/^W1[A-Za-z0-9_-]{7,41}$/.test(code))throw Error('共有コードの形式またはバージョンが違います');
+    const bits=[...code.slice(2)].map(c=>SHARE_ALPHABET.indexOf(c).toString(2).padStart(6,'0')).join('');
+    const mask=bits.slice(8,25),count=[...mask].filter(b=>b==='1').length,bodyLength=25+count*12,total=bodyLength+16;
+    if(bits.length!==Math.ceil(total/6)*6 || /1/.test(bits.slice(total)) || parseInt(bits.slice(bodyLength,total),2)!==shareCRC(bits.slice(0,bodyLength)))throw Error('共有コードが途中で切れたか、書き換わっています');
+    let offset=25;const slots=[];SHARE_SLOTS.forEach((s,i)=>{if(mask[i]==='1'){const n=parseInt(bits.slice(offset,offset+12),2);offset+=12;if(n>data.cards.length)throw Error('新しいカードの辞書が必要です。新版を再登録してください');slots.push({...s,id:n?data.cards[n-1].id:null,card:n?data.cards[n-1]:null});}});
+    if(!slots.length)throw Error('共有コードに枠がありません');
+    const ids=slots.map(s=>s.id).filter(Boolean);if(new Set(ids).size!==ids.length)throw Error('同じカードが複数枠に指定されています');
+    const cast=String(parseInt(bits.slice(0,8),2));for(const s of slots)if(s.card){const why=slotRule({...s,editable:true},{...s.card,owned:true},cast);if(why)throw Error(slotLabel(s)+'：'+why);}
+    return {cast,slots};
+  }
+  function planImportOperations(actual,rows,catalog,cast){
+    const state=actual.map(s=>({...s})),operations=[];
+    const lookup=id=>catalog.get(id)||rows.find(r=>r.card?.id===id)?.card;
+    for(let guard=0;guard<100;guard++){
+      const pending=rows.filter(r=>state.find(s=>sameSlot(r,s)).id!==r.id);if(!pending.length)return operations;
+      let selected=null;
+      for(const row of pending){
+        const dest=state.find(s=>sameSlot(row,s)),from=row.id?state.find(s=>s.id===row.id&&!sameSlot(s,dest)):null;
+        if(!row.id){selected={row,dest,from:null};break;}
+        if(!from || !dest.id || !slotRule(from,{...lookup(dest.id),owned:true},cast)){selected={row,dest,from};break;}
+      }
+      if(!selected){
+        // All remaining swaps violate a source-slot restriction. Release only
+        // one needed card, then retry the direct-set schedule.
+        const row=pending.find(r=>r.id),from=state.find(s=>s.id===row.id);
+        if(!from?.editable)throw Error('枠の制限によりこの構成へ交換できません');
+        operations.push({...from,id:null});from.id=null;continue;
+      }
+      const {row,dest,from}=selected;operations.push({...row});if(from)from.id=dest.id;dest.id=row.id;
+    }
+    throw Error('交換順序を決定できません');
+  }
+
+  async function prepareImport(api,build,catalog,progress=()=>{},pause=()=>Promise.resolve()){
+    let castName='';
+    const deck=await api.deck(build.cast),actual=slotsOf(deck),owned=new Set(actual.map(s=>s.id).filter(Boolean)),candidates=new Map(),skipped=[];
+    const rows=build.slots.filter(s=>{if(!actual.some(t=>sameSlot(s,t)&&t.editable)){skipped.push(s);return false;}return true;});
+    if(!rows.length)throw Error('このアカウントで変更できる枠がありません');
+    for(let i=0;i<rows.length;i++){
+      progress(i+1,rows.length);const row=rows[i],d=await api.candidates(build.cast,row);
+      if(d.setcast && String(d.setcast.id)!==build.cast)throw Error('候補のキャストが一致しません');
+      if(d.setcast?.name)castName=d.setcast.name;
+      const list=[d.setcard,...(d.card||[])].filter(c=>c&&validID(c.ci)).map(c=>normalizeCard(c,'deck',catalog));
+      list.filter(c=>c.owned).forEach(c=>owned.add(c.id));list.forEach(c=>catalog.set(c.id,c));candidates.set(slotKey(row),new Map(list.map(c=>[c.id,c])));if(i+1<rows.length)await pause();
+    }
+    for(const row of rows){
+      row.requestedID=row.id;
+      if(row.id && !owned.has(row.id)){
+        if(catalog.get(row.id)?.owned)throw Error(row.card.name+'：所持情報と公式候補が一致しません。再読込して確認してください');
+        row.id=null;row.missing=true;
+      }else if(row.id){const c=candidates.get(slotKey(row)).get(row.id);if(!c || !c.owned)throw Error(row.card.name+'：この枠の公式候補にありません');const why=unavailableReason(c)||slotRule({...row,editable:true},c,build.cast);if(why)throw Error(row.card.name+'：'+why);}
+    }
+    // Moving a card out of an unmentioned reserve slot leaves that slot empty.
+    const moved=[];for(const row of rows)if(row.id){const from=actual.find(s=>s.id===row.id&&!rows.some(t=>sameSlot(s,t)));if(from){if(!from.editable)throw Error('固定枠のカードは移動できません');moved.push({...from,id:null,moved:true});}}
+    rows.push(...moved);
+    const operations=planImportOperations(actual,rows,catalog,build.cast);
+    for(const s of operations.filter(s=>!s.id)){const permission=await api.permission(build.cast,s);if(!permission.remove)throw Error(slotLabel(s)+'：必要な取り外しを公式画面が許可していません');await pause();}
+    return {cast:build.cast,castName,deck,before:deckSignature(deck),rows,skipped,operations};
+  }
+  async function applyImport(engine,plan,progress=()=>{},wait=()=>Promise.resolve()){
+    if(!await engine.changeCast(plan.cast))throw Error(engine.error||'キャストを読み込めません');
+    if(deckSignature(engine.deck)!==plan.before)throw Error('確認後にデッキが変わりました。再度プレビューしてください');
+    for(let i=0;i<plan.operations.length;i++){
+      if(i){progress(i,plan.operations.length,true);await wait();}
+      const op=plan.operations[i];progress(i,plan.operations.length,false);
+      if(!await engine.chooseSlot(op))throw Error(engine.error||'枠を読み込めません');
+      if(!await engine.save(op.id||'remove'))throw Error(engine.error||engine.status||'保存できません');
+      progress(i+1,plan.operations.length,false);
+    }
+    const latest=await engine.api.deck(plan.cast);engine.deck=latest;
+    const expected=slotsOf(plan.deck).map(s=>({...s,id:plan.rows.find(r=>sameSlot(s,r))?.id ?? (plan.rows.some(r=>sameSlot(s,r))?null:s.id)}));
+    const received=slotsOf(latest);
+    if(expected.length!==received.length || expected.some(s=>received.find(t=>sameSlot(s,t))?.id!==s.id))throw Error('最終配置が予定と一致しません。表示中のデッキを確認してください');
+    engine.emit();return true;
+  }
+
   class Engine {
     constructor(api, catalog, notify) {
       this.api=api; this.catalog=catalog; this.notify=notify || (()=>{});
@@ -404,7 +502,7 @@
     }
     dispose(){if(this.locked)return false;this.disposed=true;this.epoch++;return true;}
   }
-  if(typeof module==='object' && module.exports){module.exports={acquisitionFor,acquisitionHTML,leadingCards,VERSIONS,referenceNoImpact,referenceCondition,referenceValue,referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
+  if(typeof module==='object' && module.exports){module.exports={sharePostURL,planImportOperations,SHARE_SLOTS,encodeBuild,decodeBuild,prepareImport,applyImport,validateShareDictionary,acquisitionFor,acquisitionHTML,leadingCards,VERSIONS,referenceNoImpact,referenceCondition,referenceValue,referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
   if(location.origin!=='https://wonderland-wars.net' || !/^\/deck\/(index|deckchange)\.html$/.test(location.pathname)){alert('Wonder.NETのカード編集画面で実行してください。');return;}
   let resume=null;
   if(window.__wonderDeck){
@@ -433,7 +531,7 @@
   }
   const params=(cast,slot)=>new URLSearchParams({cast:String(cast),type:slot.type,slot:String(slot.slot)});
   const api={
-    deck:async cast=>{const d=await request('/deck/setdeck?cast='+encodeURIComponent(cast));if(!Array.isArray(d.skill)||!Array.isArray(d.reserve))throw Error('デッキの形式が変更されています');return d;},
+    deck:async cast=>{const d=await request('/deck/setdeck?cast='+encodeURIComponent(cast));if(d.reserve==null)d.reserve=[];if(!Array.isArray(d.skill)||!Array.isArray(d.reserve))throw Error('デッキの形式が変更されています');return d;},
     candidates:async(cast,slot)=>{const d=await request('/deck/mydeck.json?'+params(cast,slot));if(!Array.isArray(d.card))throw Error('候補カードを取得できません');return d;},
     permission:async(cast,slot)=>{const html=await request('/deck/deckchange.html?'+params(cast,slot),'text'),doc=new DOMParser().parseFromString(html,'text/html'),key=doc.querySelector('#hkey')?.textContent.trim();if(!key)throw Error('変更キーを取得できません。ログイン状態を確認してください');return {key,remove:!!doc.querySelector('#btn_remove')};},
     commit:async(cast,slot,id,key)=>{const q=params(cast,slot);q.set('card',id);q.set('key',key);const html=await request('/deck/deckchange_ok.html?'+q,'text');const doc=new DOMParser().parseFromString(html,'text/html');return {error:[...doc.querySelectorAll('#info_message_box,.text_red')].map(e=>e.textContent.trim()).filter(Boolean).join(' ')};}
@@ -447,7 +545,7 @@
   if(!viewport){viewport=document.createElement('meta');viewport.name='viewport';document.head.append(viewport);madeViewport=true;}
   viewport.setAttribute('content','width=device-width, initial-scale=1');
   root.innerHTML=`<style>
-:host{color-scheme:light}.app-menu{position:relative;flex:none}.app-menu>summary{display:flex;align-items:center;justify-content:center;list-style:none;width:44px;height:44px;cursor:pointer;border:1px solid #a59a86;border-radius:7px;background:#f7f2e8}.app-menu>summary::-webkit-details-marker{display:none}.app-menu>summary:focus-visible{outline:3px solid #008596;outline-offset:2px}.app-menu[open]>summary,.app-menu>summary:hover{background:#e0efeb;border-color:#087f8c}.hamburger{width:20px;height:14px;border-top:2px solid;border-bottom:2px solid;position:relative}.hamburger:after{content:"";position:absolute;left:0;right:0;top:5px;border-top:2px solid}.menu-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:30;width:160px;padding:6px;display:grid;gap:5px;border:1px solid #a59a86;border-radius:8px;background:#faf6ee;box-shadow:0 4px 16px #0003}.menu-panel button{text-align:left;min-height:44px}.result-summary{display:flex;align-items:baseline;gap:8px;margin:8px 0;min-width:0}.result-summary #count{flex:none}.result-summary .conditions{margin:0;min-width:0;line-height:1.5}*{box-sizing:border-box}button,input,select{font:inherit;color:#29251e}button,select,input{border:1px solid #a59a86;border-radius:7px;background:#f7f2e8}button{padding:8px 11px;cursor:pointer}button:hover{border-color:#087f8c;background:#e0efeb}button:disabled{cursor:default;opacity:.45}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #008596;outline-offset:2px}input[type=search]{width:100%;padding:10px 12px;background:#fffdf7}select{padding:7px;max-width:100%}input[type=checkbox]{accent-color:#07848f}h1,h2,h3,h4,p{margin:0}h2{font-size:16px}small,.muted{color:#655e53}.shell{height:100%;height:100dvh;display:flex;flex-direction:column;background:#e9e1d2 url(/common/images/bg_base.jpg) center/cover;color:#27231e;font:14px/1.5 system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color-scheme:light}.top{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid #897e6c;background:#eee7d9 url(/common/images/bg_body.jpg);flex-wrap:wrap}.brand{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800}.brand img{width:156px;height:auto;display:block}.brand span{color:#9e1731}.spacer{flex:1}.status{font-size:12px;color:#333c3a;padding:6px 18px;min-height:30px;background:#f2eee4;border-bottom:1px solid #a69a86}.status.error{color:#8f231e}.layout{max-width:1760px;width:calc(100% - 24px);margin:0 auto 12px;border:1px solid #877b64;box-shadow:0 5px 22px #0006;background:#f7f1e7 url(/common/images/bg_body.jpg);display:grid;grid-template-columns:304px minmax(300px,1fr) 300px;flex:1;min-height:0}.pane{min-height:0;overflow:auto;padding:14px;overscroll-behavior:contain}.deck{background:#faf7efeb;border-right:1px solid #b3a68d;padding:10px}.catalog{background:#fffcf6c7}.detail{background:#faf6ee url(/common/images/bg_body.jpg) repeat-y;background-size:100% auto;border-left:1px solid #b3a68d}.deck-row{display:grid;grid-template-columns:3fr 1fr;gap:5px;margin-bottom:8px}.deck-row.equipment{grid-template-columns:4fr 1fr}.deck-group{min-width:0}.section{font-size:11px;color:#fff;background:#282524 url(/common/images/h3_bg01.png) center/100% 100%;text-align:center;padding:3px 1px;margin-bottom:4px;white-space:nowrap}.slot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}.single .slot-grid{grid-template-columns:minmax(0,1fr)}.equipment .slot-grid,.reserve .slot-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.equipment .single .slot-grid{grid-template-columns:minmax(0,1fr)}.slot{position:relative;display:flex;flex-direction:column;gap:3px;align-items:center;width:100%;min-width:0;text-align:center;background:#fffaf0;border-color:#d8ccba;padding:4px 2px}.slot.active{border-color:#0c8792;background:#dceddf;box-shadow:inset 0 0 0 1px #0c8792}.slot img{width:34px;height:48px;object-fit:contain}.slot b{font-size:10px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;min-height:26px}.slot .empty-slot{height:48px;display:grid;place-items:center;color:#796d58;font-size:11px}.slot .restriction{position:absolute;right:0;top:0;background:#d9eadc;border-radius:3px;font-size:9px;padding:0 2px;color:#245142}.foot{font-size:9px;color:#6c6355;margin-top:8px}.toolbar{display:flex;gap:8px;align-items:center;margin:9px 0;flex-wrap:wrap}.toolbar label{font-size:12px;display:flex;align-items:center;gap:4px}.toolbar button{font-size:12px;padding:6px}.toolbar small{font-size:11px}#target{color:#fff;background:#222 url(/common/images/h2_bg.png) center/100% 100%;text-align:center;padding:9px 14px;font-size:15px}.category-tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:2px solid #07848f;margin:10px 0 12px;padding-bottom:5px}.category-tabs button{padding:6px 9px;font-size:12px;border-radius:6px 6px 0 0;background:#f4eddf}.category-tabs button[aria-selected=true]{background:#087f8c;border-color:#087f8c;color:white;font-weight:700}.filters{background:#f2ecdf;border:1px solid #b5aa93;border-radius:8px;padding:9px;margin-bottom:10px}.filters summary{cursor:pointer;color:#39342b}.filter-row{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.filter-row strong{font-size:11px;min-width:66px;color:#51483c}.check{font-size:11px;background:#e9e1d1;border-radius:5px;padding:5px;display:inline-flex;align-items:center;gap:2px}.conditions{font-size:11px;color:#245a53;line-height:1.6;margin:8px 0;overflow-wrap:anywhere}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}.group-heading,.level-heading{grid-column:1/-1}.group-heading{font-size:15px;color:#624414;border-bottom:2px solid #bfa66d;margin-top:10px;padding:3px 1px}.group-heading{margin-bottom:8px}.group-heading.other{color:#334c49;border-color:#9baca5}.level-heading{display:flex;align-items:center;gap:9px;font-size:12px;color:#534935;padding:5px 0 0}.level-heading:after{content:'';height:1px;flex:1;background:#c3b59c}.card{position:relative;text-align:left;padding:7px;background:#fffdf6;border-color:#b7ab95;min-width:0;display:flex;flex-direction:column;gap:5px}.card.selected{border-color:#078896;box-shadow:0 0 0 1px #078896}.card img{width:100%;aspect-ratio:120/169;object-fit:contain;min-height:0}.card b{font-size:11px;line-height:1.5;overflow-wrap:anywhere}.card .meta{font-size:10px;color:#625b4f}.rank{position:absolute;left:4px;top:4px;background:#f8d885;color:#362711;padding:2px 4px;border-radius:4px;font-size:10px;font-weight:700}.card.unowned:disabled{opacity:.5;filter:grayscale(.6);background:#eee9df;cursor:not-allowed}.more{width:100%;margin:16px 0}.detail-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:14px}.detail-title button{display:none}.portrait{display:block;width:150px;max-height:225px;object-fit:contain;margin:10px auto}.effect{white-space:pre-wrap;font-size:13px;line-height:1.8;margin:14px 0;overflow-wrap:anywhere}.up{color:#a8261d}.down{color:#185f9b}.data{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.data span{padding:4px 7px;background:#e7dfcf;border-radius:5px;font-size:11px}.actions{position:sticky;bottom:-14px;background:#faf6ee;padding:12px 0;display:grid;gap:8px}.primary{background:#087f8c;border-color:#087f8c;color:#fff;font-weight:800}.primary:hover{background:#066873;color:#fff}.reason{font-size:12px;line-height:1.5;color:#715637}.empty{padding:28px 8px;color:#5e594e;line-height:1.8}.mobile-nav{display:none}.reconcile{background:#ebd4ad}.cast-picker{position:absolute;z-index:5;top:60px;left:12px;right:12px;max-width:740px;max-height:70vh;overflow:auto;background:#f7f1e5;border:1px solid #80765f;border-radius:12px;padding:16px;box-shadow:0 20px 80px #000a}.cast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;margin-top:12px}.cast-grid button{font-size:12px;display:flex;align-items:center;gap:5px;text-align:left}.cast-icon{display:block;flex:none;width:40px;height:16px;overflow:hidden}.cast-grid .cast-icon img{display:block;width:40px;height:auto;max-width:none}.cast-name{min-width:0;overflow-wrap:anywhere}.cast-grid button[aria-pressed=true]{border-color:#07848f;background:#e0efeb}.cast-picker[hidden]{display:none}.detail-backdrop{display:none}
+:host{color-scheme:light}.app-menu{position:relative;flex:none}.app-menu>summary{display:flex;align-items:center;justify-content:center;list-style:none;width:44px;height:44px;cursor:pointer;border:1px solid #a59a86;border-radius:7px;background:#f7f2e8}.app-menu>summary::-webkit-details-marker{display:none}.app-menu>summary:focus-visible{outline:3px solid #008596;outline-offset:2px}.app-menu[open]>summary,.app-menu>summary:hover{background:#e0efeb;border-color:#087f8c}.hamburger{width:20px;height:14px;border-top:2px solid;border-bottom:2px solid;position:relative}.hamburger:after{content:"";position:absolute;left:0;right:0;top:5px;border-top:2px solid}.menu-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:30;width:252px;padding:10px;display:grid;gap:5px;border:1px solid #a59a86;border-radius:8px;background:#faf6ee;box-shadow:0 4px 16px #0003}.menu-panel button{text-align:left;min-height:44px}.result-summary{display:flex;align-items:baseline;gap:8px;margin:8px 0;min-width:0}.result-summary #count{flex:none}.result-summary .conditions{margin:0;min-width:0;line-height:1.5}*{box-sizing:border-box}button,input,select{font:inherit;color:#29251e}button,select,input{border:1px solid #a59a86;border-radius:7px;background:#f7f2e8}button{padding:8px 11px;cursor:pointer}button:hover{border-color:#087f8c;background:#e0efeb}button:disabled{cursor:default;opacity:.45}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #008596;outline-offset:2px}input[type=search]{width:100%;padding:10px 12px;background:#fffdf7}select{padding:7px;max-width:100%}input[type=checkbox]{accent-color:#07848f}h1,h2,h3,h4,p{margin:0}h2{font-size:16px}small,.muted{color:#655e53}.shell{height:100%;height:100dvh;display:flex;flex-direction:column;background:#e9e1d2 url(/common/images/bg_base.jpg) center/cover;color:#27231e;font:14px/1.5 system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color-scheme:light}.top{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid #897e6c;background:#eee7d9 url(/common/images/bg_body.jpg);flex-wrap:wrap}.brand{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800}.brand img{width:156px;height:auto;display:block}.brand span{color:#9e1731}.spacer{flex:1}.status{font-size:12px;color:#333c3a;padding:6px 18px;min-height:30px;background:#f2eee4;border-bottom:1px solid #a69a86}.status.error{color:#8f231e}.layout{max-width:1760px;width:calc(100% - 24px);margin:0 auto 12px;border:1px solid #877b64;box-shadow:0 5px 22px #0006;background:#f7f1e7 url(/common/images/bg_body.jpg);display:grid;grid-template-columns:304px minmax(300px,1fr) 300px;flex:1;min-height:0}.pane{min-height:0;overflow:auto;padding:14px;overscroll-behavior:contain}.deck{background:#faf7efeb;border-right:1px solid #b3a68d;padding:10px}.catalog{background:#fffcf6c7}.detail{background:#faf6ee url(/common/images/bg_body.jpg) repeat-y;background-size:100% auto;border-left:1px solid #b3a68d}.deck-row{display:grid;grid-template-columns:3fr 1fr;gap:5px;margin-bottom:8px}.deck-row.equipment{grid-template-columns:4fr 1fr}.deck-group{min-width:0}.section{font-size:11px;color:#fff;background:#282524 url(/common/images/h3_bg01.png) center/100% 100%;text-align:center;padding:3px 1px;margin-bottom:4px;white-space:nowrap}.slot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}.single .slot-grid{grid-template-columns:minmax(0,1fr)}.equipment .slot-grid,.reserve .slot-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.equipment .single .slot-grid{grid-template-columns:minmax(0,1fr)}.slot{position:relative;display:flex;flex-direction:column;gap:3px;align-items:center;width:100%;min-width:0;text-align:center;background:#fffaf0;border-color:#d8ccba;padding:4px 2px}.slot.active{border-color:#0c8792;background:#dceddf;box-shadow:inset 0 0 0 1px #0c8792}.slot img{width:34px;height:48px;object-fit:contain}.slot b{font-size:10px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;min-height:26px}.slot .empty-slot{height:48px;display:grid;place-items:center;color:#796d58;font-size:11px}.slot .restriction{position:absolute;right:0;top:0;background:#d9eadc;border-radius:3px;font-size:9px;padding:0 2px;color:#245142}.foot{font-size:9px;color:#6c6355;margin-top:8px}.toolbar{display:flex;gap:8px;align-items:center;margin:9px 0;flex-wrap:wrap}.toolbar label{font-size:12px;display:flex;align-items:center;gap:4px}.toolbar button{font-size:12px;padding:6px}.toolbar small{font-size:11px}#target{color:#fff;background:#222 url(/common/images/h2_bg.png) center/100% 100%;text-align:center;padding:9px 14px;font-size:15px}.category-tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:2px solid #07848f;margin:10px 0 12px;padding-bottom:5px}.category-tabs button{padding:6px 9px;font-size:12px;border-radius:6px 6px 0 0;background:#f4eddf}.category-tabs button[aria-selected=true]{background:#087f8c;border-color:#087f8c;color:white;font-weight:700}.filters{background:#f2ecdf;border:1px solid #b5aa93;border-radius:8px;padding:9px;margin-bottom:10px}.filters summary{cursor:pointer;color:#39342b}.filter-row{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.filter-row strong{font-size:11px;min-width:66px;color:#51483c}.check{font-size:11px;background:#e9e1d1;border-radius:5px;padding:5px;display:inline-flex;align-items:center;gap:2px}.conditions{font-size:11px;color:#245a53;line-height:1.6;margin:8px 0;overflow-wrap:anywhere}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}.group-heading,.level-heading{grid-column:1/-1}.group-heading{font-size:15px;color:#624414;border-bottom:2px solid #bfa66d;margin-top:10px;padding:3px 1px}.group-heading{margin-bottom:8px}.group-heading.other{color:#334c49;border-color:#9baca5}.level-heading{display:flex;align-items:center;gap:9px;font-size:12px;color:#534935;padding:5px 0 0}.level-heading:after{content:'';height:1px;flex:1;background:#c3b59c}.card{position:relative;text-align:left;padding:7px;background:#fffdf6;border-color:#b7ab95;min-width:0;display:flex;flex-direction:column;gap:5px}.card.selected{border-color:#078896;box-shadow:0 0 0 1px #078896}.card img{width:100%;aspect-ratio:120/169;object-fit:contain;min-height:0}.card b{font-size:11px;line-height:1.5;overflow-wrap:anywhere}.card .meta{font-size:10px;color:#625b4f}.rank{position:absolute;left:4px;top:4px;background:#f8d885;color:#362711;padding:2px 4px;border-radius:4px;font-size:10px;font-weight:700}.card.unowned:disabled{opacity:.5;filter:grayscale(.6);background:#eee9df;cursor:not-allowed}.more{width:100%;margin:16px 0}.detail-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:14px}.detail-title button{display:none}.portrait{display:block;width:150px;max-height:225px;object-fit:contain;margin:10px auto}.effect{white-space:pre-wrap;font-size:13px;line-height:1.8;margin:14px 0;overflow-wrap:anywhere}.up{color:#a8261d}.down{color:#185f9b}.data{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.data span{padding:4px 7px;background:#e7dfcf;border-radius:5px;font-size:11px}.actions{position:sticky;bottom:-14px;background:#faf6ee;padding:12px 0;display:grid;gap:8px}.primary{background:#087f8c;border-color:#087f8c;color:#fff;font-weight:800}.primary:hover{background:#066873;color:#fff}.reason{font-size:12px;line-height:1.5;color:#715637}.empty{padding:28px 8px;color:#5e594e;line-height:1.8}.mobile-nav{display:none}.reconcile{background:#ebd4ad}.cast-picker{position:absolute;z-index:5;top:60px;left:12px;right:12px;max-width:740px;max-height:70vh;overflow:auto;background:#f7f1e5;border:1px solid #80765f;border-radius:12px;padding:16px;box-shadow:0 20px 80px #000a}.cast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;margin-top:12px}.cast-grid button{font-size:12px;display:flex;align-items:center;gap:5px;text-align:left}.cast-icon{display:block;flex:none;width:40px;height:16px;overflow:hidden}.cast-grid .cast-icon img{display:block;width:40px;height:auto;max-width:none}.cast-name{min-width:0;overflow-wrap:anywhere}.cast-grid button[aria-pressed=true]{border-color:#07848f;background:#e0efeb}.cast-picker[hidden]{display:none}.detail-backdrop{display:none}
 .card{display:flex;flex-direction:column;gap:0;align-self:start;padding:0;overflow:hidden;isolation:isolate}.card-art{position:relative;display:block;width:100%;aspect-ratio:120/169;overflow:hidden;flex:none}.card .card-art img{position:absolute;top:0;left:0;display:block;width:100%;height:auto;aspect-ratio:120/169;object-fit:contain}.card-caption{position:relative;width:100%;height:77px;flex:none;display:grid;grid-template-rows:14px 12px 12px 24px;gap:2px;padding:5px 5px 4px;background:linear-gradient(#fff9e9e8,#fff9e9fa);color:#24211b;box-shadow:0 -1px 0 #4f463855}.card b{font-size:11px;line-height:14px;display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.card .meta{font-size:9px;line-height:12px;color:#413d32;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card .category{font-weight:600;letter-spacing:-.3px}.card-check{display:none;position:absolute;right:3px;top:3px;z-index:2;font-size:17px;line-height:22px;width:24px;height:24px;text-align:center;border-radius:5px;background:#fffdf2e8;box-shadow:0 1px 3px #0005;pointer-events:none}.card.equipped .card-check{display:block}.card-state{font-weight:600}.condition-stars{color:#895800;font-weight:800;margin-right:2px}.rank{z-index:1;top:3px;left:3px;padding:2px 3px;font-size:9px}.card.unowned:disabled{opacity:.5}
 @media(min-width:1450px){.layout{grid-template-columns:330px minmax(400px,1fr) 350px}.grid{grid-template-columns:repeat(auto-fill,minmax(115px,1fr))}.slot img{width:38px;height:54px}.slot b{font-size:11px}}
 @media(max-width:1080px){.layout{grid-template-columns:280px minmax(250px,1fr)}.detail{display:none}.detail.open{display:flex;position:absolute;right:0;top:0;bottom:0;width:min(400px,90vw);z-index:9;box-shadow:-20px 0 60px #0008}.detail-title button{display:block}.detail-backdrop.open{display:block;position:absolute;inset:0;background:#0008;z-index:8}}
@@ -455,7 +553,8 @@
 @media(max-height:650px) and (min-width:701px){.deck .slot img{width:29px;height:41px}.deck .slot{padding:3px 2px}.deck .section{padding:2px 1px}.deck-row{margin-bottom:5px}}
 .detail{display:flex;flex-direction:column;overflow:hidden}.detail-title{flex:none;align-items:flex-start;margin-bottom:8px}.detail-title h2{font-size:16px;line-height:1.45}.detail-summary{display:flex;align-items:flex-start;gap:8px;flex:none;margin-bottom:7px}.detail .portrait{width:32px;height:45px;max-height:45px;object-fit:contain;margin:0;flex:none}.detail .data{margin:0;gap:4px}.detail .data span{padding:2px 5px;font-size:10px}.detail-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding-right:3px}.detail-body .muted{font-size:11px;line-height:1.5}.detail .effect{font-size:13px;line-height:1.65;margin:8px 0}.detail .actions{position:static;flex:none;padding:8px 0 0;margin-top:8px;gap:6px;border-top:1px solid #ccbea4;background:#faf6ee}.detail .reason{font-size:11px}.detail .actions button{padding:8px 10px}@media(max-width:1080px){.detail{display:none}.detail.open{display:flex}}@media(max-width:700px){.detail .actions{padding-bottom:max(8px,env(safe-area-inset-bottom))}}
 .reference{font-size:11px;line-height:1.55;margin:8px 0;padding:8px;background:#f5eddd;border:1px solid #b9a887;border-radius:6px;color:#393024}.reference p{margin:5px 0}.reference a{color:#086777}.reference label{display:block;margin:4px 0}.reference summary{cursor:pointer}.card .ref-line{font-size:9px;line-height:12px;height:24px;overflow:hidden;white-space:normal}
-</style><div class="shell" data-tab="deck"><header class="top"><div class="brand"><img src="/common/images/bg_header.jpg" alt="Wonder.NET"><span>カード編集 拡張</span></div><small class="version">${VERSION}</small><button data-action="casts" id="cast-current">読み込み中…</button><div class="spacer"></div><details class="app-menu"><summary aria-label="メニュー" title="メニュー"><span class="hamburger" aria-hidden="true"></span></summary><div class="menu-panel"><button data-action="reload">再読込</button><button data-action="close">閉じる</button></div></details></header><div id="status" class="status" role="status" aria-live="polite">カード情報を読み込み中…</div><nav class="mobile-nav"><button data-action="tab" data-value="deck" class="active">デッキ</button><button data-action="tab" data-value="catalog">カード一覧</button></nav><main class="layout"><section class="pane deck" aria-label="現在のデッキ"></section><section class="pane catalog" aria-label="カード一覧"><h2 id="target">編集する枠を選択</h2><div class="toolbar"><input type="search" id="search" placeholder="カード名・効果を検索" aria-label="カード名・効果を検索"></div><nav id="category-tabs" class="category-tabs" role="tablist" aria-label="カードカテゴリ"></nav><details class="filters"><summary>絞り込み条件</summary><div class="toolbar"><label><input type="checkbox" data-filter="recommended">おすすめ限定</label><small>Lv.昇順 → レアリティ降順</small><button data-action="clear">全解除</button></div><div id="filter-controls"></div></details><div class="result-summary"><strong id="count">0枚</strong><span class="conditions" id="conditions"></span></div><section id="recommendations" aria-label="セット中・おすすめカード" hidden><h3 class="group-heading">セット中・おすすめ</h3><div class="grid" id="recommend-grid"></div></section><h3 class="group-heading other">カード一覧</h3><div class="grid" id="card-grid"></div><button class="more" data-action="more">さらに表示</button></section><div class="detail-backdrop" data-action="detail-close"></div><aside class="pane detail" aria-label="カード詳細"></aside></main><div class="cast-picker" hidden><div class="toolbar"><strong>キャストを選択</strong><button data-action="casts-close">閉じる</button></div><div class="cast-grid"></div></div></div>`;
+.menu-panel{grid-template-columns:minmax(0,1fr)}.top .menu-panel [data-action]{grid-column:auto;grid-row:auto}.menu-panel button{display:flex;align-items:center;gap:12px;border:0;background:transparent;padding:10px;border-radius:6px}.menu-panel button:hover{background:#e4eee6}.menu-panel button>span:first-child{font-size:22px;color:#087f8c}.menu-panel small{display:block;font-size:11px;color:#71654e}.menu-panel hr{width:100%;border:0;border-top:1px solid #d5c9b3;margin:3px 0}.share-dialog{box-sizing:border-box;width:min(560px,calc(100vw - 24px));max-height:85dvh;overflow:auto;border:1px solid #a69678;border-radius:14px;padding:20px;background:#faf6ed;color:#29251e;font:14px/1.6 system-ui,-apple-system,sans-serif;box-shadow:0 15px 70px #0007}.share-dialog::backdrop{background:#0009}.share-dialog p{margin:12px 0}.share-dialog textarea{box-sizing:border-box;width:100%;margin:8px 0;padding:10px;border:1px solid #b7a989;border-radius:7px;resize:vertical;font:16px/1.6 monospace;background:#fff;color:#25231f;overflow-wrap:anywhere}.share-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.share-heading h2{font-size:18px}.share-heading button{font-size:20px}.share-build{margin:10px 0}.share-build>div{display:grid;grid-template-columns:110px 1fr;gap:8px;padding:5px;border-bottom:1px solid #dacfba}.share-build span{font-size:12px}.share-buttons{display:flex;gap:10px;justify-content:flex-end}.share-working{display:flex;gap:12px;align-items:center}.share-working progress{width:100%;accent-color:#087f8c}.share-spinner{width:24px;height:24px;flex:none;border:3px solid #d4c7af;border-top-color:#087f8c;border-radius:50%;animation:share-spin 1s linear infinite}@keyframes share-spin{to{transform:rotate(360deg)}}.share-post{display:inline-flex;align-items:center;padding:8px 11px;border-radius:7px;background:#24211e;color:#fff;text-decoration:none}.share-buttons{flex-wrap:wrap}.share-status{white-space:pre-wrap;overflow-wrap:anywhere}
+</style><div class="shell" data-tab="deck"><header class="top"><div class="brand"><img src="/common/images/bg_header.jpg" alt="Wonder.NET"><span>カード編集 拡張</span></div><small class="version">${VERSION}</small><button data-action="casts" id="cast-current">読み込み中…</button><div class="spacer"></div><details class="app-menu"><summary aria-label="メニュー" title="メニュー"><span class="hamburger" aria-hidden="true"></span></summary><div class="menu-panel"><small>ビルドの共有</small><button data-action="share-export"><span aria-hidden="true">↗</span><span>エクスポート<small>共有コードを作成</small></span></button><button data-action="share-import"><span aria-hidden="true">↙</span><span>インポート<small>コードから構成を反映</small></span></button><hr><button data-action="reload"><span aria-hidden="true">↻</span>再読込</button><button data-action="close"><span aria-hidden="true">×</span>閉じる</button></div></details></header><div id="status" class="status" role="status" aria-live="polite">カード情報を読み込み中…</div><nav class="mobile-nav"><button data-action="tab" data-value="deck" class="active">デッキ</button><button data-action="tab" data-value="catalog">カード一覧</button></nav><main class="layout"><section class="pane deck" aria-label="現在のデッキ"></section><section class="pane catalog" aria-label="カード一覧"><h2 id="target">編集する枠を選択</h2><div class="toolbar"><input type="search" id="search" placeholder="カード名・効果を検索" aria-label="カード名・効果を検索"></div><nav id="category-tabs" class="category-tabs" role="tablist" aria-label="カードカテゴリ"></nav><details class="filters"><summary>絞り込み条件</summary><div class="toolbar"><label><input type="checkbox" data-filter="recommended">おすすめ限定</label><small>Lv.昇順 → レアリティ降順</small><button data-action="clear">全解除</button></div><div id="filter-controls"></div></details><div class="result-summary"><strong id="count">0枚</strong><span class="conditions" id="conditions"></span></div><section id="recommendations" aria-label="セット中・おすすめカード" hidden><h3 class="group-heading">セット中・おすすめ</h3><div class="grid" id="recommend-grid"></div></section><h3 class="group-heading other">カード一覧</h3><div class="grid" id="card-grid"></div><button class="more" data-action="more">さらに表示</button></section><div class="detail-backdrop" data-action="detail-close"></div><aside class="pane detail" aria-label="カード詳細"></aside></main><div class="cast-picker" hidden><div class="toolbar"><strong>キャストを選択</strong><button data-action="casts-close">閉じる</button></div><div class="cast-grid"></div></div></div>`;
   const $=s=>root.querySelector(s), $$=s=>[...root.querySelectorAll(s)];
   let engine, filter=emptyFilter(), visible=48, castList=[], catalog=new Map(), lastSlot='', lastCast='', observer, booting=false;
   let listRef, listFilter='', filteredCache=[], drawn=0, deckRenderKey='', searchTimer;
@@ -463,6 +562,50 @@
   const overlap=c=>c.overlap==null?'':c.overlap>=10?('MAX'+(c.kind==='skill' && c.overlap>10?' ＋'+(c.overlap>=30?'MAX':c.overlap-10):'')):('+'+c.overlap);
   function show(){host.style.display='block';}
   function message(text,error){$('#status').textContent=text;$('#status').classList.toggle('error',!!error);}
+  let shareData=null,sharePromise=null,shareBusy=false,sharePlan=null;
+  const shareDialog=document.createElement('dialog');shareDialog.className='share-dialog';root.append(shareDialog);
+  const shareMessage=message=>{const p=shareDialog.querySelector('.share-status');if(p)p.textContent=message;};
+  function shareFrame(title,body){shareDialog.innerHTML=`<div class="share-heading"><h2>${esc(title)}</h2><button data-action="share-close" aria-label="モーダルを閉じる">×</button></div>${body}<p class="share-status" role="status" aria-live="polite"></p>`;if(!shareDialog.open)shareDialog.showModal();}
+  function setShareBusy(busy){shareBusy=busy;shareDialog.setAttribute('aria-busy',String(busy));shareDialog.querySelectorAll('button,textarea').forEach(el=>el.disabled=busy);}
+  shareDialog.addEventListener('cancel',ev=>{if(shareBusy)ev.preventDefault();});
+  async function getShareData(){
+    if(shareData)return shareData;if(sharePromise)return sharePromise;
+    sharePromise=(async()=>{const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),15000);try{
+      const res=await fetch('https://satokoyo.github.io/wlw/share-cards-1.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});if(!res.ok)throw Error('共有辞書の取得に失敗しました');shareData=validateShareDictionary(await res.json());return shareData;
+    }finally{clearTimeout(timer);aborts.delete(ctl);sharePromise=null;}})();return sharePromise;
+  }
+  function sharePreview(plan){
+    const name=plan.castName || castList.find(c=>c.id===plan.cast)?.name || 'キャスト '+plan.cast;
+    return `<h3>${esc(name)}</h3><div class="share-build">${plan.rows.map(s=>`<div><span>${esc(slotLabel(s))}</span><b>${esc(s.id?(s.card?.name||catalog.get(s.id)?.name||s.id):'空欄')}${s.missing?'（未所持：'+esc(s.card?.name||'名称未取得')+'）':s.moved?'（移動元）':''}</b></div>`).join('')}</div>${plan.skipped.length?`<p>未解放・存在しない${plan.skipped.length}枠は変更しません。</p>`:''}<p>コードにない枠は維持します。ただし同じカードの移動元は空欄になります。</p><p>変更が必要な枠だけを直接セットし、保存の照合後に1秒待って続けます（${plan.operations.length}回、待機だけで約${Math.max(0,plan.operations.length-1)*1}秒）。途中で停止した場合、完了した変更は残ります。</p>`;
+  }
+  async function openShare(mode){
+    if(!engine || engine.locked || engine.loading || shareBusy)return;
+    $('.app-menu').open=false;sharePlan=null;
+    if(mode==='import'){shareFrame('ビルドをインポート','<label>共有コード<textarea id="share-code" rows="3" spellcheck="false" placeholder="W1…"></textarea></label><p>キャスト・構成を確認してから反映します。未所持カードは空欄にします。</p><button class="primary" data-action="share-preview">構成を確認</button>');shareDialog.querySelector('textarea').focus();return;}
+    shareFrame('ビルドをエクスポート','<p>サーバーの最新構成から共有コードを作成しています…</p>');setShareBusy(true);
+    try{const cast=engine.cast,data=await getShareData(),deck=await api.deck(cast),code=encodeBuild(cast,slotsOf(deck),data);
+      const name=engine.castName||castList.find(c=>c.id===cast)?.name||'キャスト '+cast;
+      shareFrame('ビルドをエクスポート',`<h3>${esc(name)}</h3><label>共有コード（${code.length}文字）<textarea id="share-code" readonly rows="3" spellcheck="false">${code}</textarea></label><div class="share-buttons"><button class="primary" data-action="share-copy">コードをコピー</button><a class="share-post" href="${esc(sharePostURL(name,code))}" target="_blank" rel="noopener noreferrer">Xで投稿</a></div><p>通常デッキと解放済みリザーブを共有します。強化値・アカウント情報は含みません。</p>`);
+    }catch(e){shareMessage(e.message);}finally{setShareBusy(false);}
+  }
+  async function previewShare(){
+    const code=shareDialog.querySelector('#share-code').value;setShareBusy(true);sharePlan=null;
+    try{const build=decodeBuild(code,await getShareData());if(!castList.some(c=>c.id===build.cast))throw Error('このアカウントで利用できるキャストではありません');
+      sharePlan=await prepareImport(api,build,catalog,(n,total)=>shareMessage(`所持・解放枠を確認中 ${n} / ${total}`),()=>new Promise(r=>setTimeout(r,300)));
+      shareFrame('インポート内容の確認',sharePreview(sharePlan)+'<div class="share-buttons"><button data-action="share-close">キャンセル</button><button class="primary" data-action="share-run">この構成を反映</button></div>');
+    }catch(e){shareMessage(e.message);}finally{setShareBusy(false);}
+  }
+  async function runShare(){
+    if(!sharePlan || shareBusy)return;const plan=sharePlan;sharePlan=null;setShareBusy(true);
+    const unload=e=>{e.preventDefault();e.returnValue='';};window.addEventListener('beforeunload',unload);
+    shareFrame('ビルドを反映中','<div class="share-working"><span class="share-spinner" aria-hidden="true"></span><progress max="'+Math.max(1,plan.operations.length)+'" value="0"></progress></div><p>サーバー負荷を避けるため、保存を1秒間隔で分割実行しています。この画面を開いたままお待ちください。</p>');setShareBusy(true);
+    const before=engine.successes;
+    try{await applyImport(engine,plan,(n,total,waiting)=>{shareDialog.querySelector('progress').value=n;shareMessage(`${n} / ${total} 保存確認済み${waiting?' · 次の保存まで待機中':' · 処理中'}`);},()=>new Promise(r=>setTimeout(r,1000)));
+      shareFrame('インポート完了','<p>サーバーの構成と全枠を照合しました。</p><button data-action="share-close">閉じる</button>');
+    }catch(e){shareFrame('インポートを停止しました',`<p>${esc(e.message)}</p><p>${engine.successes-before}回の保存は反映済みです。自動で再送しません。${engine.uncertain?'モーダルを閉じ、再照合してください。':'最新の構成を確認してからやり直してください。'}</p><button data-action="share-close">閉じる</button>`);}
+    finally{window.removeEventListener('beforeunload',unload);setShareBusy(false);render();}
+  }
+
   function setTab(tab){$('.shell').dataset.tab=tab;$$('[data-action=tab]').forEach(b=>b.classList.toggle('active',b.dataset.value===tab));}
   function filterUI(){
     const row=(key,title,values)=>`<div class="filter-row"><strong>${title}</strong>${Object.entries(values).map(([v,t])=>`<label class="check"><input type="checkbox" data-filter="${key}" value="${v}">${esc(t)}</label>`).join('')}</div>`;
@@ -495,7 +638,7 @@
   async function loadReference(){
     const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
     try{
-      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.4.5.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.5.0.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       const data=await response.json(),index=referenceIndex(data);
       // Only fixed, reviewed source links may be rendered.
@@ -507,7 +650,7 @@
   }
 
   function renderDeck(e,busy){
-    const group=(type,label,cls='')=>`<section class="deck-group ${cls}" aria-label="${label}"><h3 class="section">${label}</h3><div class="slot-grid">${e.slots.filter(s=>s.type===type && !(s.type==='skill' && s.slot===0)).map(s=>{
+    const group=(type,label,cls='')=>!e.slots.some(s=>s.type===type && (type!=='reserve'||s.editable))?'':`<section class="deck-group ${cls}" aria-label="${label}"><h3 class="section">${label}</h3><div class="slot-grid">${e.slots.filter(s=>s.type===type && !(s.type==='skill' && s.slot===0) && (type!=='reserve'||s.editable)).map(s=>{
       const c=catalog.get(s.id) || e.rankings.find(c=>c.id===s.id) || {id:s.id,name:s.id?'名称未取得':'未設定',kind:s.kind};
       const condition=['assist','soul'].includes(s.type)?equipmentStars(c,e.deck,catalog):{stars:'',title:''};
       return `<button class="slot ${sameSlot(s,e.slot)?'active':''}" data-action="slot" data-value="${slotKey(s)}" title="${esc(slotLabel(s)+'：'+c.name+(condition.title?'\n'+condition.title:''))}" aria-label="${esc(slotLabel(s)+'：'+c.name+(condition.title?' '+condition.title:''))}" ${busy?'disabled':''}>${s.id?`<img src="${img(c)}" alt="">`:'<span class="empty-slot">空き</span>'}${s.type==='assist' && s.slot===9?'<span class="restriction">6+</span>':''}<b>${condition.stars?`<span class="condition-stars">${condition.stars}</span>`:''}${esc(c.name)}</b></button>`;
@@ -528,7 +671,7 @@
     const e=engine, busy=e.locked;
     $$('.cast-grid button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.value===e.cast)));
     const cast=castList.find(c=>c.id===e.cast);$('#cast-current').textContent=(cast && cast.name)||e.castName||('キャスト '+e.cast);
-    $('#cast-current').disabled=busy;$$('[data-action=reload],[data-action=close]').forEach(b=>b.disabled=busy);
+    $('#cast-current').disabled=busy;$$('[data-action=reload],[data-action=close],[data-action=share-export],[data-action=share-import]').forEach(b=>b.disabled=busy);
     message((e.error?e.error+' ｜ ':'')+e.status,!!e.error);
     if(e.uncertain){const b=document.createElement('button');b.textContent='保存結果を再照合';b.dataset.action='reconcile';b.disabled=e.pending;b.className='reconcile';$('#status').append(' ',b);}
     const deckKey=e.deck?deckSignature(e.deck)+'|'+e.cast+'|'+(e.slot?slotKey(e.slot):'')+'|'+busy+'|'+e.loading:'';
@@ -585,6 +728,7 @@
   }
   function chooseCard(id){if(!engine || engine.loading)return;const c=engine.currentDetail?.id===id?engine.currentDetail:engine.cards.find(c=>c.id===id);if(unavailableReason(c))return;engine.selected=c;renderDetail();$$('.card').forEach(b=>{const selected=b.dataset.value===id;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});$('.detail').classList.add('open');$('.detail-backdrop').classList.add('open');$('.detail').scrollTop=0;}
   function close(){
+    if(shareBusy)return;
     if(engine && !engine.dispose())return;
     aborts.forEach(c=>c.abort());observer?.disconnect();clearTimeout(searchTimer);host.remove();background.forEach(([el,inert])=>el.inert=inert);document.documentElement.style.overflow=oldOverflow;
     if(madeViewport)viewport.remove();else if(oldViewport==null)viewport.removeAttribute('content');else viewport.setAttribute('content',oldViewport);
@@ -602,6 +746,12 @@
     if(!event.target.closest('.app-menu'))menu.open=false;
     const b=event.target.closest('[data-action]');if(!b || b.disabled)return;
     const action=b.dataset.action;
+    if(shareBusy)return;
+    if(action==='share-close'){shareDialog.close();return;}
+    if(action==='share-export'||action==='share-import'){await openShare(action==='share-export'?'export':'import');return;}
+    if(action==='share-preview'){await previewShare();return;}
+    if(action==='share-run'){await runShare();return;}
+    if(action==='share-copy'){try{await navigator.clipboard.writeText(shareDialog.querySelector('textarea').value);shareMessage('コピーしました');}catch(e){shareDialog.querySelector('textarea').select();shareMessage('コードを選択しました。コピーしてください');}return;}
     if(action==='close'){if(!engine?.locked && window.confirm('カード編集拡張を閉じますか？\n保存済みのカード設定はそのまま残ります。'))close();return;}
     if(action==='reload')menu.open=false;
     if(action==='detail-close'){$('.detail').classList.remove('open');$('.detail-backdrop').classList.remove('open');return;}
@@ -628,7 +778,7 @@
     if(el.id==='effect-mode')filter.effectMode=el.value;
     visible=48;renderCards();
   });
-  root.addEventListener('keydown',ev=>{if(ev.key==='Escape'){const menu=$('.app-menu');if(menu.open){menu.open=false;menu.querySelector('summary').focus();return;}$('.detail').classList.remove('open');$('.detail-backdrop').classList.remove('open');$('.cast-picker').hidden=true;}});
+  root.addEventListener('keydown',ev=>{if(ev.key==='Escape'){if(shareDialog.open)return;const menu=$('.app-menu');if(menu.open){menu.open=false;menu.querySelector('summary').focus();return;}$('.detail').classList.remove('open');$('.detail-backdrop').classList.remove('open');$('.cast-picker').hidden=true;}});
   filterUI();
   observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting) && !$('.more').hidden){visible+=48;renderCards();}},{root:$('.catalog'),rootMargin:'150px'});observer.observe($('.more'));
   async function boot(){

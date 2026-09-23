@@ -1,4 +1,4 @@
-# Wonder Deck 1.1.0 設計メモ
+# WonderLandDeck 1.1.0 設計メモ
 
 ## CDNフレームワークの検討
 
