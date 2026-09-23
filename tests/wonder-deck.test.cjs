@@ -279,3 +279,12 @@ test('official adventure/event classifications remain distinct in filters',()=>{
  f.versions=['20','70'];assert.equal(filterCards(cards,f,2).length,5);
  f.versions=[];assert.equal(filterCards(cards,f,2).length,5);
 });
+
+test('master labels distinguish summon and immediate effects without changing tabs',()=>{
+ const a={kind:'mskill',effect:'zcsbsフリックをするとサモン待機状態になる。'};
+ const b={kind:'mskill',effect:'zcsbsflibs攻撃する。'};
+ assert.equal(cardCategoryText(a),'マスタースキル・サモン');
+ assert.equal(cardCategoryText(b),'マスタースキル・即時');
+ assert.equal(cardCategoryText({kind:'mskill',effect:''}),'マスタースキル');
+ assert.equal(categoryKey(a),'mskill');assert.equal(categoryKey(b),'mskill');
+});
