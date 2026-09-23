@@ -3,7 +3,7 @@
  */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('../src/wonder-deck.js');
+const {VERSIONS,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature}=require('../src/wonder-deck.js');
 const id=n=>n.toString(16).padStart(32,'0');
 const raw=(n,ct=2,lv=6)=>({ci:id(n),na:'Card '+n,ca:ct===1?1:7,ct,lv,ol:10,te:'assbsfcrhpufs',ra:3,fi:8,gr:[5]});
 const card=(n,kind='assist',level=6)=>({id:id(n),kind,level,owned:true});
@@ -263,3 +263,19 @@ test('an unsupported second equipment condition is retained instead of claiming 
 
 // Keep the published CI entry point covering the loader and reference dataset.
 require('./reference-cases.cjs');
+
+// Official /rankdata/cardlist.json version table, checked 2026-09-23.
+test('official adventure/event classifications remain distinct in filters',()=>{
+ assert.equal(VERSIONS[70],'冒険譚');
+ assert.equal(VERSIONS[20],'イベント');
+ assert.equal(VERSIONS[90],'特典');
+ const names=['約束の指輪','焼け焦げた羽飾り','踊り子の靴','青銅の短剣'];
+ const adventure=names.map((na,i)=>normalizeCard({...raw(i+1),na,gr:[70]},'deck'));
+ const event=normalizeCard({...raw(5,3),na:'武神 関羽',gr:[20]},'deck');
+ const cards=[...adventure,event];
+ const f=emptyFilter();f.versions=['70'];
+ assert.deepEqual(new Set(filterCards(cards,f,2).map(c=>c.name)),new Set(names));
+ f.versions=['20'];assert.deepEqual(filterCards(cards,f,2).map(c=>c.name),['武神 関羽']);
+ f.versions=['20','70'];assert.equal(filterCards(cards,f,2).length,5);
+ f.versions=[];assert.equal(filterCards(cards,f,2).length,5);
+});

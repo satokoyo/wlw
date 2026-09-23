@@ -4,14 +4,14 @@
 /* Wonder Deck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.4.0';
+  const VERSION = '1.4.1';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
   const CAT = {1: '攻撃', 2: '回復', 3: '強化', 4: '妨害', 5: '移動・特殊', 7: '武器', 8: '防具', 9: '装飾', 10: '道具', 11: 'ソウル'};
   const RARITY = {1: 'N', 2: 'R', 3: 'SR', 4: 'WR'};
   const EFFECTS = {1: 'ストレート', 2: 'ドロー', 4: 'スピード', 8: 'HP', 16: 'MP'};
-  const VERSIONS = {1: 'Ver.1', 2: 'Ver.2', 3: 'Ver.3', 4: 'Ver.4', 5: 'Ver.5', 9: 'NEW', 19: 'キャスト専用', 20: '冒険譚', 50: 'クラフト', 70: 'イベント', 90: 'その他'};
+  const VERSIONS = {1: 'Ver.1', 2: 'Ver.2', 3: 'Ver.3', 4: 'Ver.4', 5: 'Ver.5', 9: 'NEW', 19: 'キャスト専用', 20: 'イベント', 50: 'クラフト', 70: '冒険譚', 90: '特典'};
   const WORDS = {sti:'使用可能レベルに達すると、以下の効果を発動する。',zcs:'【全キャスト共通スキル】',ass:'【アシスト】',bka:'【冒険専用アシスト】',bks:'【冒険専用スキル】',ksh:'この効果はストーリーモードでのみ発動する。',kss:'このカードはストーリーモードでのみ使用できる。',fli:'フリックをすると即時発動する。',sau:'▲ストレート攻撃力が上がる',sad:'▼ストレート攻撃力が下がる',dau:'▲ドロー攻撃力が上がる',dad:'▼ドロー攻撃力が下がる',hpu:'▲最大ＨＰが上がる',hpd:'▼最大ＨＰが下がる',mpu:'▲最大ＭＰが上がる',mpd:'▼最大ＭＰが下がる',spu:'▲スピードが上がる',spd:'▼スピードが下がる',sku:'▲スキル防御力が上がる'};
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const norm = s => String(s || '').normalize('NFKC').toLocaleLowerCase('ja');
@@ -385,7 +385,7 @@
     }
     dispose(){if(this.locked)return false;this.disposed=true;this.epoch++;return true;}
   }
-  if(typeof module==='object' && module.exports){module.exports={referenceNoImpact,referenceCondition,referenceValue,referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
+  if(typeof module==='object' && module.exports){module.exports={VERSIONS,referenceNoImpact,referenceCondition,referenceValue,referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
   if(location.origin!=='https://wonderland-wars.net' || !/^\/deck\/(index|deckchange)\.html$/.test(location.pathname)){alert('Wonder.NETのカード編集画面で実行してください。');return;}
   let resume=null;
   if(window.__wonderDeck){
@@ -476,7 +476,7 @@
   async function loadReference(){
     const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
     try{
-      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.4.0.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.4.1.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       const data=await response.json(),index=referenceIndex(data);
       // Only fixed, reviewed source links may be rendered.
