@@ -413,3 +413,5 @@ test('W3 names are ASCII-only and round-trip Japanese and emoji; old W2 stays re
  const prefix=encodeBuild(2,slots,data).split('.')[0];const old='W2'+prefix.slice(2)+'.全国';assert.equal(decodeBuild(old+'.'+checksum(old),data).name,'全国');
  for(const encoded of ['_w','AB','A','!!!!']){const body=prefix+'.'+encoded;assert.throws(()=>decodeBuild(body+'.'+checksum(body),data),/符号化/);}
 });
+
+require('./effect-filters.cjs');

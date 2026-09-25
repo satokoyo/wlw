@@ -4,13 +4,15 @@
 /* WonderLandDeck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.5.4';
+  const VERSION = '1.5.5';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
   const CAT = {1: '攻撃', 2: '回復', 3: '強化', 4: '妨害', 5: '移動・特殊', 7: '武器', 8: '防具', 9: '装飾', 10: '道具', 11: 'ソウル'};
   const RARITY = {1: 'N', 2: 'R', 3: 'SR', 4: 'WR'};
-  const EFFECTS = {1: 'ストレート', 2: 'ドロー', 4: 'スピード', 8: 'HP', 16: 'MP'};
+  const CUSTOM_EFFECTS = {evade:'回避距離',skillPower:'スキル攻撃力',killDamage:'撃破ダメージ',expRange:'経験値獲得範囲'};
+  const EFFECTS = {1: 'ストレート', 2: 'ドロー', 4: 'スピード', 8: 'HP', 16: 'MP',...CUSTOM_EFFECTS};
+  let customEffectIndex=new Map();
   const VERSIONS = {1: 'Ver.1', 2: 'Ver.2', 3: 'Ver.3', 4: 'Ver.4', 5: 'Ver.5', 9: 'NEW', 19: 'キャスト専用', 20: 'イベント', 50: 'クラフト', 70: '冒険譚', 90: '特典'};
   const WORDS = {sti:'使用可能レベルに達すると、以下の効果を発動する。',zcs:'【全キャスト共通スキル】',ass:'【アシスト】',bka:'【冒険専用アシスト】',bks:'【冒険専用スキル】',ksh:'この効果はストーリーモードでのみ発動する。',kss:'このカードはストーリーモードでのみ使用できる。',fli:'フリックをすると即時発動する。',sau:'▲ストレート攻撃力が上がる',sad:'▼ストレート攻撃力が下がる',dau:'▲ドロー攻撃力が上がる',dad:'▼ドロー攻撃力が下がる',hpu:'▲最大ＨＰが上がる',hpd:'▼最大ＨＰが下がる',mpu:'▲最大ＭＰが上がる',mpd:'▼最大ＭＰが下がる',spu:'▲スピードが上がる',spd:'▼スピードが下がる',sku:'▲スキル防御力が上がる'};
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -243,9 +245,18 @@
     if(!c.effect)missing.push('効果');
     return missing.length?'情報未取得（'+missing.join('・')+'）のためセットできません':'';
   }
+  function effectFilterIndex(data){
+    if(data?.schemaVersion!==1 || !Array.isArray(data.cards))throw Error('独自能力データの形式が異なります');
+    const index=new Map();
+    for(const row of data.cards){
+      if(!validID(row.id)||index.has(row.id)||!Array.isArray(row.effects)||row.effects.some(k=>!Object.hasOwn(CUSTOM_EFFECTS,k)))throw Error('独自能力データが不正です');
+      index.set(row.id,new Set(row.effects));
+    }
+    return index;
+  }
   const emptyFilter = () => ({q:'',kind:[],categoryTab:'all',level:[],rarity:[],versions:[],effects:[],effectMode:'all',proper:false,recommended:false});
   const defaultFilter = () => ({...emptyFilter(),rarity:['2','3','4'],keepUnknownRarity:true});
-  function filterCards(cards, f, cast) {
+  function filterCards(cards, f, cast, effectIndex=customEffectIndex) {
     const words = norm(f.q).trim().split(/\s+/).filter(Boolean);
     const result = cards.filter(c => {
       if (words.some(w => !c.search.includes(w))) return false;
@@ -254,8 +265,8 @@
       if (f.versions.length && !f.versions.some(v => c.versions.includes(Number(v)))) return false;
       if (f.proper && !c.peculiar.some(r => r.ty === 'cast' && String(r.ci) === String(cast))) return false;
       if (f.recommended && !c.rank) return false;
-      const flags = f.effects.map(Number);
-      if (flags.length && !(f.effectMode === 'all' ? flags.every(v => c.flags & v) : flags.some(v => c.flags & v))) return false;
+      const hasEffect=v=>Object.hasOwn(CUSTOM_EFFECTS,v)?!!effectIndex.get(c.id)?.has(v):!!(c.flags & Number(v));
+      if (f.effects.length && !(f.effectMode === 'all' ? f.effects.every(hasEffect) : f.effects.some(hasEffect))) return false;
       return true;
     });
     result.sort((a,b) => kindOrder(a)-kindOrder(b) || levelOrder(a)-levelOrder(b) || (b.rarity || 0)-(a.rarity || 0));
@@ -544,7 +555,7 @@
     }
     dispose(){if(this.locked)return false;this.disposed=true;this.epoch++;return true;}
   }
-  if(typeof module==='object' && module.exports){module.exports={sharePostURL,planImportOperations,SHARE_SLOTS,encodeBuild,decodeBuild,prepareImport,applyImport,validateShareDictionary,acquisitionFor,acquisitionHTML,leadingCards,VERSIONS,referenceNoImpact,referenceCondition,referenceValue,referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,defaultFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
+  if(typeof module==='object' && module.exports){module.exports={effectFilterIndex,CUSTOM_EFFECTS,sharePostURL,planImportOperations,SHARE_SLOTS,encodeBuild,decodeBuild,prepareImport,applyImport,validateShareDictionary,acquisitionFor,acquisitionHTML,leadingCards,VERSIONS,referenceNoImpact,referenceCondition,referenceValue,referenceIndex,referenceFor,referenceTotals,equipmentConditions,equipmentStars,Engine,normalizeCard,slotRule,slotsOf,slotKey,filterCards,recommendedCards,emptyFilter,defaultFilter,categoryKey,cardCategoryText,levelOrder,levelLabel,cardGroup,unavailableReason,effectText,effectHTML,deckSignature};return;}
   if(location.origin!=='https://wonderland-wars.net' || !/^\/deck\/(index|deckchange)\.html$/.test(location.pathname)){alert('Wonder.NETのカード編集画面で実行してください。');return;}
   let resume=null;
   if(window.__wonderDeck){
@@ -650,7 +661,7 @@
   const drawer=$('.app-menu');Object.defineProperty(drawer,'open',{get(){return this.classList.contains('is-open');},set(value){this.classList.toggle('is-open',!!value);this.querySelector('.menu-toggle').setAttribute('aria-expanded',String(!!value));this.querySelector('.menu-panel').inert=!value;if(value)this.querySelector('.drawer-heading button').focus();}});
   function setTab(tab){$('.shell').dataset.tab=tab;$$('[data-action=tab]').forEach(b=>b.classList.toggle('active',b.dataset.value===tab));}
   function filterUI(){
-    const row=(key,title,values)=>`<div class="filter-row"><strong>${title}</strong>${Object.entries(values).map(([v,t])=>`<label class="check"><input type="checkbox" data-filter="${key}" value="${v}" ${filter[key]?.includes(v)?'checked':''}>${esc(t)}</label>`).join('')}</div>`;
+    const row=(key,title,values)=>`<div class="filter-row"><strong>${title}</strong>${Object.entries(values).map(([v,t])=>`<label class="check"><input type="checkbox" data-filter="${key}" value="${v}" ${filter[key]?.includes(v)?'checked':''} ${key==='effects' && Object.hasOwn(CUSTOM_EFFECTS,v)?'data-custom-effect disabled title="独自能力データを読み込み中"':''}>${esc(t)}</label>`).join('')}</div>`;
     $('#filter-controls').innerHTML=row('kind','カード種別',{skill:'通常スキル',mskill:'マスタースキル',assist:'アシスト',soul:'ソウル'})+row('level','使用レベル',{1:1,2:2,3:3,4:4,5:5,6:6,7:7})+row('rarity','レアリティ',RARITY)+row('effects','上昇能力',EFFECTS)+`<div class="filter-row"><strong>能力の条件</strong><select id="effect-mode" aria-label="上昇能力の条件"><option value="all">すべて含む</option><option value="any">いずれか含む</option></select></div>`+row('versions','バージョン等',VERSIONS)+`<div class="filter-row"><label class="check"><input type="checkbox" data-filter="proper">選択キャストの専用アシスト</label></div>`;
   }
   let referenceData=null, referenceMap=new Map(), referenceState='読込中', referenceLevel=8, referenceActive=true;
@@ -680,15 +691,15 @@
   async function loadReference(){
     const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
     try{
-      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.5.4.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+      const response=await fetch('https://satokoyo.github.io/wlw/reference-stats-1.5.5.json',{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
-      const data=await response.json(),index=referenceIndex(data);
+      const data=await response.json(),index=referenceIndex(data),effects=effectFilterIndex(data.effectFilters);
       // Only fixed, reviewed source links may be rendered.
       for(const page of [939,778,788,769,945,1005,984])if(data.sources?.[page]!==`https://w.atwiki.jp/wlws/pages/${page}.html`)throw Error('出典が不正です');
       if(!host.isConnected)return;
-      referenceData=data;referenceMap=index;referenceState='取得済み';
+      referenceData=data;referenceMap=index;customEffectIndex=effects;referenceState='取得済み';
     }catch(err){referenceState='取得できません（カード編集は利用できます）';}
-    finally{clearTimeout(timer);aborts.delete(ctl);if(host.isConnected){deckRenderKey='';listRef=null;render();}}
+    finally{clearTimeout(timer);aborts.delete(ctl);if(host.isConnected){$$('[data-custom-effect]').forEach(el=>{el.disabled=referenceState!=='取得済み';el.title=el.disabled?'独自能力データを取得できません。メニューから再読込してください。':'条件付き・固有の上昇効果を含みます';});deckRenderKey='';listRef=null;render();}}
   }
 
   function renderDeck(e,busy){
@@ -842,7 +853,7 @@
     if(!engine){if(action==='reload')boot();return;}
     if(action==='casts' && !engine.locked){$('.cast-picker').hidden=!$('.cast-picker').hidden;return;}
     if(action==='cast' && !engine.locked){$('.cast-picker').hidden=true;setTab('deck');await engine.changeCast(b.dataset.value);return;}
-    if(action==='reload' && !engine.locked){await engine.changeCast(engine.cast,engine.slot);return;}
+    if(action==='reload' && !engine.locked){if(referenceState.startsWith('取得できません'))loadReference();await engine.changeCast(engine.cast,engine.slot);return;}
     if(action==='slot'){const s=engine.slots.find(s=>slotKey(s)===b.dataset.value);if(engine.locked)return;setTab('catalog');await engine.chooseSlot(s);return;}
     if(action==='category'){filter.categoryTab=b.dataset.value;visible=48;$('.catalog').scrollTop=0;renderCategoryTabs();renderCards();return;}
     if(action==='card'){chooseCard(b.dataset.value);return;}
