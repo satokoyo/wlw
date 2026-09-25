@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": "2026-09-23.2",
-  "reviewedAt": "2026-09-23",
+  "revision": "2026-09-25.1",
+  "reviewedAt": "2026-09-25",
   "sources": {
     "939": "https://w.atwiki.jp/wlws/pages/939.html",
     "778": "https://w.atwiki.jp/wlws/pages/778.html",
@@ -52,17 +52,6 @@
       }
     },
     {
-      "name": "くたびれた干竿",
-      "kind": "assist",
-      "stats": {
-        "ds": {
-          "base": 4.2,
-          "active": 4.2,
-          "source": 778
-        }
-      }
-    },
-    {
       "name": "くたびれた釣竿",
       "kind": "assist",
       "stats": {
@@ -71,7 +60,10 @@
           "active": 4.2,
           "source": 778
         }
-      }
+      },
+      "aliases": [
+        "くたびれた干竿"
+      ]
     },
     {
       "name": "まやかしの玉の枝",
@@ -251,10 +243,11 @@
       "kind": "assist",
       "stats": {
         "ds": {
-          "base": 0,
-          "active": 14,
-          "source": 778,
-          "note": "5.38-I後。特殊効果発動時"
+          "base": null,
+          "active": null,
+          "source": 769,
+          "note": "5.38-L後の特殊込みは5.4〜6.1目盛（DS表の尺度で10.8〜12.2）と幅があり確定値不明。旧14を除外。通常DSも現行値未判明",
+          "errata": "5.38-L"
         }
       }
     },
@@ -285,9 +278,10 @@
       "kind": "assist",
       "stats": {
         "ds": {
-          "base": 10.33,
+          "base": 0,
           "active": 10.33,
-          "source": 778
+          "source": 778,
+          "note": "レベルアップ時の一時効果。10.33は発動中の合計"
         }
       }
     },
@@ -303,7 +297,7 @@
       }
     },
     {
-      "name": "人徳ある漁師の釣り竿",
+      "name": "仁徳ある漁師の釣竿",
       "kind": "assist",
       "stats": {
         "ss": {
@@ -311,7 +305,10 @@
           "active": 3.15,
           "source": 939
         }
-      }
+      },
+      "aliases": [
+        "人徳ある漁師の釣り竿"
+      ]
     },
     {
       "name": "仇討ちの打金と打石",
@@ -375,7 +372,7 @@
       }
     },
     {
-      "name": "使いこまれた糸切り鋏",
+      "name": "使い込まれた糸切り鋏",
       "kind": "assist",
       "stats": {
         "ds": {
@@ -383,7 +380,10 @@
           "active": 9.5,
           "source": 778
         }
-      }
+      },
+      "aliases": [
+        "使いこまれた糸切り鋏"
+      ]
     },
     {
       "name": "修行僧の法衣",
@@ -486,9 +486,10 @@
       "kind": "assist",
       "stats": {
         "ds": {
-          "base": 10.33,
+          "base": 0,
           "active": 10.33,
-          "source": 778
+          "source": 778,
+          "note": "時間経過で発動。ダウン等で終了。10.33は発動中の合計"
         }
       }
     },
@@ -549,7 +550,7 @@
       "kind": "assist",
       "stats": {
         "ss": {
-          "base": null,
+          "base": 0,
           "active": 10,
           "note": "SR装備と時間の条件",
           "source": 939,
@@ -571,7 +572,7 @@
           "base": null,
           "active": 27,
           "source": 778,
-          "note": "SR装備時19、時間経過後27。未発動時の基本値は不明",
+          "note": "他の非ソウルSR発動時の合計19、時間経過後の合計27。19＋27ではない。基本値未判明",
           "condition": {
             "count": 1,
             "rarity": 3,
@@ -719,7 +720,7 @@
       }
     },
     {
-      "name": "夢失いし悪童の鉄斧",
+      "name": "夢失いし悪童の銃斧",
       "kind": "assist",
       "stats": {
         "skill": {
@@ -740,7 +741,10 @@
           "source": 939,
           "note": "修正後の特殊増分は未判明。旧値は採用しない"
         }
-      }
+      },
+      "aliases": [
+        "夢失いし悪童の鉄斧"
+      ]
     },
     {
       "name": "大河創りのお札",
@@ -945,8 +949,8 @@
         },
         "skill": {
           "base": 0,
-          "active": -50,
-          "note": "他の非ソウルSRが発動時に低下",
+          "active": -30.83,
+          "note": "他の非ソウルSRが発動時に低下。評価ページの-50と相違するため数値表788の-30.83を優先",
           "source": 788,
           "condition": {
             "rarity": 3,
@@ -1002,9 +1006,10 @@
       "stats": {
         "ds": {
           "base": 3.7,
-          "active": 13,
-          "note": "特殊効果込みの値へ切替（加算しない）",
-          "source": 778
+          "active": 3.7,
+          "note": "5.38-Iで特殊効果が変更。DSは基本値のみ。旧特殊込み13は除外",
+          "source": 769,
+          "errata": "5.38-I"
         }
       }
     },
@@ -1112,21 +1117,24 @@
       "stats": {
         "ss": {
           "base": 2.35,
-          "active": 5.35,
-          "note": "特殊効果込み",
-          "source": 939
+          "active": 2.35,
+          "note": "5.38-K後は防御・スピードの特殊効果。旧SS・DS・スキル攻撃の追加分を除外",
+          "source": 769,
+          "errata": "5.38-K"
         },
         "ds": {
           "base": 2.17,
-          "active": 12.57,
-          "note": "特殊効果込みの値へ切替（加算しない）",
-          "source": 778
+          "active": 2.17,
+          "note": "5.38-K後は防御・スピードの特殊効果。旧SS・DS・スキル攻撃の追加分を除外",
+          "source": 769,
+          "errata": "5.38-K"
         },
         "skill": {
           "base": 0,
-          "active": 6.67,
-          "note": "スキル使用回数条件",
-          "source": 788
+          "active": 0,
+          "note": "5.38-K後は防御・スピードの特殊効果。旧SS・DS・スキル攻撃の追加分を除外",
+          "source": 769,
+          "errata": "5.38-K"
         }
       }
     },
@@ -1259,8 +1267,9 @@
         "ds": {
           "base": 2.2,
           "active": 6.4,
-          "note": "特殊効果込みの値へ切替（加算しない）",
-          "source": 778
+          "note": "ファイター限定・兵士撃破条件。6.4は通常2.2を含む合計",
+          "source": 778,
+          "role": "fighter"
         }
       }
     },
@@ -1328,8 +1337,18 @@
         "skill": {
           "base": 0,
           "active": 17.5,
-          "note": "スキル使用回数条件",
-          "source": 788
+          "note": "スキル使用条件達成後。現行MAX17.5、+5は15.8。旧強化段階表は不採用",
+          "source": 788,
+          "byOverlap": {
+            "5": {
+              "base": 0,
+              "active": 15.8
+            },
+            "10": {
+              "base": 0,
+              "active": 17.5
+            }
+          }
         }
       }
     },
@@ -1477,7 +1496,7 @@
       }
     },
     {
-      "name": "狂いし教王の東洋剣",
+      "name": "狂いし教王の東洋刀",
       "kind": "assist",
       "stats": {
         "ds": {
@@ -1485,7 +1504,10 @@
           "active": 7.8,
           "source": 778
         }
-      }
+      },
+      "aliases": [
+        "狂いし教王の東洋剣"
+      ]
     },
     {
       "name": "猪殺しの狩衣",
@@ -1674,7 +1696,7 @@
       }
     },
     {
-      "name": "福結びの枡",
+      "name": "福呼びの升",
       "kind": "assist",
       "stats": {
         "ss": {
@@ -1682,7 +1704,10 @@
           "active": 5.35,
           "source": 939
         }
-      }
+      },
+      "aliases": [
+        "福結びの枡"
+      ]
     },
     {
       "name": "空の矢筒",
@@ -1777,8 +1802,9 @@
         "skill": {
           "base": 3.33,
           "active": 24.17,
-          "note": "回復MS・攻撃条件",
-          "source": 788
+          "note": "回復カテゴリMS装備＋最大成長。24.17は通常3.33を含む合計（追加加算しない）",
+          "source": 788,
+          "masterCategory": 2
         }
       }
     },
@@ -1826,10 +1852,10 @@
       "kind": "assist",
       "stats": {
         "ss": {
-          "base": 7,
+          "base": 0,
           "active": 7,
           "source": 939,
-          "note": "5.38-L後。旧8.5は不採用"
+          "note": "5.38-L後の7はレベルアップ時の一時効果。通常SSは0"
         }
       }
     },
@@ -2151,7 +2177,7 @@
       }
     },
     {
-      "name": "遙かなる年を経た猟銃",
+      "name": "遥かな年を経た猟銃",
       "kind": "assist",
       "stats": {
         "ss": {
@@ -2160,7 +2186,10 @@
           "note": "レベルアップ後の一時強化",
           "source": 939
         }
-      }
+      },
+      "aliases": [
+        "遙かなる年を経た猟銃"
+      ]
     },
     {
       "name": "邪気を纏いし金の腕輪",
@@ -2265,9 +2294,10 @@
         },
         "ds": {
           "base": 3.7,
-          "active": 17.2,
-          "note": "特殊効果込みの値へ切替（加算しない）",
-          "source": 778
+          "active": null,
+          "note": "5.38-LでDSの上昇値・上限が下方。旧合計17.2は除外。現行の特殊込みDSは未判明",
+          "source": 769,
+          "errata": "5.38-L"
         },
         "skill": {
           "base": 0,
@@ -2352,21 +2382,26 @@
           "base": 0,
           "active": 13.33,
           "source": 1005,
-          "note": "5.12-A後、最大成長時"
+          "note": "アタッカー限定・最大成長。5.12-A後の上限13.33",
+          "role": "attacker"
         }
       }
     },
     {
-      "name": "青の占星術師のヴェール",
+      "name": "青の占星師のヴェール",
       "kind": "assist",
       "stats": {
         "ss": {
           "base": 0,
           "active": 7.2,
           "source": 939,
-          "note": "特殊カテゴリMS装備・最大成長時"
+          "note": "特殊カテゴリMS装備・最大成長時",
+          "masterCategory": 5
         }
-      }
+      },
+      "aliases": [
+        "青の占星術師のヴェール"
+      ]
     },
     {
       "name": "飛翔月兎の冠",
@@ -2527,9 +2562,10 @@
       "kind": "assist",
       "stats": {
         "ds": {
-          "base": 8.3,
+          "base": 0,
           "active": 8.3,
-          "source": 778
+          "source": 778,
+          "note": "森の外でのみ発動。8.3は特殊効果込みの合計"
         }
       }
     },
@@ -2930,9 +2966,16 @@
       "kind": "soul",
       "stats": {
         "ds": {
-          "base": 10.4,
+          "base": 0,
           "active": 10.4,
-          "source": 778
+          "source": 778,
+          "note": "使用可能レベル到達後、一度だけ一定時間。10.4は発動中の合計"
+        },
+        "ss": {
+          "base": 0,
+          "active": 4,
+          "source": 939,
+          "note": "使用可能レベル到達後、一度だけ一定時間"
         }
       }
     },
@@ -3077,7 +3120,7 @@
       }
     },
     {
-      "name": "伽倻",
+      "name": "伽耶",
       "kind": "soul",
       "stats": {
         "ss": {
@@ -3085,7 +3128,10 @@
           "active": 5.5,
           "source": 939
         }
-      }
+      },
+      "aliases": [
+        "伽倻"
+      ]
     },
     {
       "name": "先代の魔女アグニ",
@@ -3148,9 +3194,24 @@
       "kind": "soul",
       "stats": {
         "ds": {
-          "base": 12.5,
+          "base": 0,
           "active": 12.5,
-          "source": 778
+          "source": 778,
+          "stages": [
+            {
+              "count": 1,
+              "value": null
+            },
+            {
+              "count": 2,
+              "value": 12.5
+            }
+          ],
+          "condition": {
+            "rarity": 4,
+            "count": 1
+          },
+          "note": "他のWRアシスト0枚なら0、1枚時は数値未判明、2枚以上で最大合計12.5。2段階の合計を重複加算しない"
         }
       }
     },
@@ -3449,7 +3510,7 @@
       }
     },
     {
-      "name": "春心の緑 雀蘭",
+      "name": "春心の縁 雀蘭",
       "kind": "soul",
       "stats": {
         "ss": {
@@ -3457,7 +3518,10 @@
           "active": 3.5,
           "source": 939
         }
-      }
+      },
+      "aliases": [
+        "春心の緑 雀蘭"
+      ]
     },
     {
       "name": "晩夏の花火 お菊",
@@ -3916,20 +3980,26 @@
         "ss": {
           "base": 3.5,
           "active": 4.5,
-          "note": "攻撃MS条件",
-          "source": 939
+          "note": "攻撃カテゴリMS装備で発動。特殊込みは基本値を含む合計",
+          "source": 939,
+          "masterCategory": 1,
+          "automatic": true
         },
         "ds": {
           "base": 6.2,
           "active": 7,
-          "note": "特殊効果込み",
-          "source": 778
+          "note": "攻撃カテゴリMS装備で発動。特殊込みは基本値を含む合計",
+          "source": 778,
+          "masterCategory": 1,
+          "automatic": true
         },
         "skill": {
           "base": 0,
           "active": 0.83,
-          "note": "攻撃MS",
-          "source": 788
+          "note": "攻撃カテゴリMS装備で発動。特殊込みは基本値を含む合計",
+          "source": 788,
+          "masterCategory": 1,
+          "automatic": true
         }
       }
     },
@@ -4066,7 +4136,7 @@
       }
     },
     {
-      "name": "童話を紡ぐ者 リィド",
+      "name": "童話を繋ぐ者 リィド",
       "kind": "soul",
       "stats": {
         "skill": {
@@ -4089,7 +4159,10 @@
           "active": 5.5,
           "source": 939
         }
-      }
+      },
+      "aliases": [
+        "童話を紡ぐ者 リィド"
+      ]
     },
     {
       "name": "童話を裁く者エクサ",
@@ -4483,5 +4556,62 @@
   },
   "defaults": {
     "strength": "unspecified"
+  },
+  "castRoles": {
+    "サンドリヨン": "fighter",
+    "アシェンプテル": "attacker",
+    "吉備津彦": "fighter",
+    "闇吉備津": "attacker",
+    "美猴": "attacker",
+    "大聖": "fighter",
+    "ピーター・ザ・キッド": "supporter",
+    "ナイトメア・キッド": "attacker",
+    "シレネッタ": "supporter",
+    "メロウ": "fighter",
+    "リトル・アリス": "attacker",
+    "シャドウ・アリス": "fighter",
+    "アイアン・フック": "fighter",
+    "デス・フック": "attacker",
+    "ミクサ": "attacker",
+    "リン": "fighter",
+    "スカーレット": "attacker",
+    "ヴァイス": "supporter",
+    "かぐや": "supporter",
+    "ツクヨミ": "fighter",
+    "ロビン・シャーウッド": "attacker",
+    "メイド・マリアン": "supporter",
+    "温羅": "fighter",
+    "多々良": "supporter",
+    "ドルミール": "fighter",
+    "エピーヌ": "supporter",
+    "ジュゼ": "attacker",
+    "ジーン": "fighter",
+    "マリク": "attacker",
+    "シュネーヴィッツェン": "fighter",
+    "シグルドリーヴァ": "supporter",
+    "怪童丸": "attacker",
+    "邪道丸": "fighter",
+    "ドロシィ・ゲイル": "supporter",
+    "ウィキッド・ドロシィ": "attacker",
+    "深雪乃": "attacker",
+    "マグス・クラウン": "fighter",
+    "エルルカン": "attacker",
+    "妲己": "attacker",
+    "ミラベル": "fighter",
+    "火遠理": "fighter",
+    "ワダツミ": "supporter",
+    "ジョーカー": "attacker",
+    "遮那": "attacker",
+    "玉藻": "fighter",
+    "コッペリア": "fighter",
+    "ユクイコロ": "supporter",
+    "マァト": "fighter",
+    "クラマ": "fighter",
+    "ルカ": "attacker",
+    "メイディ": "supporter",
+    "ローザ": "fighter",
+    "フィー・ラプンツェル": "attacker",
+    "マリー・ラプンツェル": "fighter",
+    "パピール": "fighter"
   }
 }

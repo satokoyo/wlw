@@ -3,10 +3,10 @@ const {referenceIndex,referenceFor,referenceTotals,referenceValue,referenceCondi
 const root=path.join(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const data=JSON.parse(read('data/reference-stats.json'));
 test('reference data validates; all reviewed entries have fixed public source and finite values or null',()=>{
- const index=referenceIndex(data);assert.equal(index.size,data.cards.length);
+ const index=referenceIndex(data);assert.equal(index.size,new Set(data.cards.flatMap(r=>[r.name,...(r.aliases||[])].map(n=>r.kind+':'+n.normalize('NFKC').toLocaleLowerCase('ja').replace(/\s/g,'')))).size);
  assert.ok(data.cards.length>=180);
  for(const row of data.cards){assert.ok(referenceFor(row,index));for(const v of Object.values(row.stats)){assert.ok([939,778,788,769,945,1005,984].includes(v.source));assert.equal(v.strength ?? data.defaults.strength,'unspecified');}}
- assert.deepEqual({...JSON.parse(read('data/reference-stats.json')),acquisition:JSON.parse(read('data/acquisition.json'))},JSON.parse(read('dist/reference-stats-1.5.2.json')));
+ assert.deepEqual({...JSON.parse(read('data/reference-stats.json')),acquisition:JSON.parse(read('data/acquisition.json'))},JSON.parse(read('dist/reference-stats-1.5.3.json')));
 });
 test('exact name binding normalizes widths and whitespace, separates kinds and refuses ambiguity',()=>{
  const index=referenceIndex(data);
@@ -44,10 +44,10 @@ test('short loader locks duplicate launches and resets on error/timeout',()=>{
  l.script.onerror();assert.equal(l.window.__wonderDeckLoading,undefined);assert.equal(l.alerts.length,1);l.run();assert.notEqual(l.script,first);l.timeout();assert.equal(l.window.__wonderDeckLoading,undefined);
 });
 test('loader preserves an existing same-version UI and has matching integrity for the versioned script',()=>{
- const l=loader();let shown=0;l.window.__wonderDeck={version:'1.5.2',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
+ const l=loader();let shown=0;l.window.__wonderDeck={version:'1.5.3',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
  delete l.window.__wonderDeck;l.run();
- assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.5.2.js');
- assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.5.2.js')).digest('base64'));
+ assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.5.3.js');
+ assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.5.3.js')).digest('base64'));
  assert.equal(l.script.crossOrigin,'anonymous');assert.ok(code.length<1600);
 });
 
@@ -69,7 +69,7 @@ test('conditional penalties and multi-stage equipment/time effects do not bypass
  const catalog=new Map([['x',subject],['y',{level:2,rarity:3}],['s',{level:1,rarity:3}]]);
  const ctx={slots,catalog,level:1},entry=referenceFor(subject,index).stats.skill;
  assert.equal(referenceValue(entry,subject,true,ctx).value,0);
- ctx.level=2;assert.equal(referenceValue(entry,subject,false,ctx).value,-50);
+ ctx.level=2;assert.equal(referenceValue(entry,subject,false,ctx).value,-30.83);
  const staged=referenceFor({name:'創聖模写・不変の救難',kind:'assist'},index).stats.skill;
  assert.equal(referenceValue(staged,subject,false,ctx).value,13.33);
  assert.equal(referenceValue(staged,subject,true,ctx).value,19.17);
@@ -132,4 +132,71 @@ test('dedicated supplemental effects require the matching cast, retaining uncond
 test('cast-only preview context does not trigger incomplete equipment evaluation',()=>{
  const index=referenceIndex(data),card={name:'創聖模写・苛烈の究道',kind:'assist'};
  assert.equal(referenceValue(referenceFor(card,index).stats.ds,card,true,{castName:'リン'},'ds').value,27);
+});
+
+
+test('temporary DS totals are not unconditional base stats',()=>{
+ const index=referenceIndex(data);
+ for(const name of ['五光の龍玉','冷気封じの帽子','鶴織の着物＋','ベオウルフ']){
+  const kind=name==='ベオウルフ'?'soul':'assist',card={name,kind},entry=referenceFor(card,index).stats.ds;
+  assert.equal(referenceValue(entry,card,false).value,0,name);
+  assert.ok(referenceValue(entry,card,true).value>0,name);
+ }
+ const card={name:'義体工房の万能ネジ',kind:'assist'},v=referenceFor(card,index).stats.ss;
+ assert.equal(referenceValue(v,card,false).value,0);assert.equal(referenceValue(v,card,true).value,7);
+});
+test('errata remove obsolete offensive effects and do not reuse pre-nerf DS caps',()=>{
+ const index=referenceIndex(data),get=name=>referenceFor({name,kind:'assist'},index).stats;
+ const sword=get('意思持つ災厄の魔法剣');
+ assert.deepEqual(Object.values(sword).map(v=>[v.base,v.active]),[[2.35,2.35],[2.17,2.17],[0,0]]);
+ assert.equal(get('幻炎に映る聖樹').ds.active,3.7);
+ assert.equal(get('鍔鳴る人喰いの魔刃').ds.active,null);
+ assert.equal(get('九環の錫杖').ds.active,null);
+});
+test('MS category equipment gates survive max-effect assumptions and reserve does not qualify',()=>{
+ const index=referenceIndex(data),card={id:'s',name:'破壊少女シヴァ',kind:'soul'},entry=referenceFor(card,index).stats.ss;
+ const slots=[{id:'s',type:'soul'},{id:'m',type:'mskill'}],catalog=new Map([['m',{kind:'mskill',category:1}]]),context={slots,catalog,level:8};
+ assert.equal(referenceValue(entry,card,false).value,3.5); // Card preview: show actual base separately.
+ assert.equal(referenceValue(entry,card,false,context).value,4.5); // Equipment-only effect is automatic.
+ catalog.get('m').category=2;
+ assert.equal(referenceValue(entry,card,true,context).value,3.5);
+ delete catalog.get('m').category;assert.equal(referenceValue(entry,card,true,context).value,null);
+ slots[1].type='reserve';catalog.get('m').category=1;
+ assert.equal(referenceValue(entry,card,true,context).value,3.5);
+ for(const [name,stat,cat,base,total] of [['緑の語り部の扇','skill',2,3.33,24.17],['青の占星師のヴェール','ss',5,0,7.2]]){
+  const card={name,kind:'assist'},e=referenceFor(card,index).stats[stat];slots[1].type='mskill';catalog.get('m').category=cat;
+  assert.equal(referenceValue(e,card,false,context).value,base);assert.equal(referenceValue(e,card,true,context).value,total);
+  catalog.get('m').category=1;assert.equal(referenceValue(e,card,true,context).value,base);
+ }
+});
+test('role and cast restrictions cannot be re-enabled by a generic equipment condition',()=>{
+ const index=referenceIndex(data),card={id:'x',name:'武蔵坊の大薙刀＋',kind:'assist'},entry=referenceFor(card,index).stats.ds;
+ assert.equal(referenceValue(entry,card,true,{role:'fighter'}).value,6.4);
+ assert.equal(referenceValue(entry,card,true,{role:'attacker'}).value,2.2);
+ assert.equal(referenceValue(entry,card,true,{}).value,null);
+ const mixed={base:2,active:10,castName:'リン',condition:{rarity:3,count:1}};
+ const ctx={castName:'ミクサ',slots:[{type:'assist',id:'y'}],catalog:new Map([['y',{level:1,rarity:3}]]),level:8};
+ assert.equal(referenceValue(mixed,card,true,ctx).value,2);
+ assert.equal(data.castRoles['リン'],'fighter');assert.equal(data.castRoles['ミクサ'],'attacker');assert.equal(data.castRoles['シレネッタ'],'supporter');
+});
+test('two-stage WR condition chooses one inclusive total and keeps the unmeasured first stage unknown',()=>{
+ const index=referenceIndex(data),card={id:'s',name:'凍みる心 カイ',kind:'soul'},entry=referenceFor(card,index).stats.ds;
+ const slots=[{id:'s',type:'soul'},{id:'a',type:'assist'},{id:'b',type:'assist'}],catalog=new Map([['a',{rarity:4,level:2}],['b',{rarity:4,level:6}]]),ctx={slots,catalog,level:1};
+ assert.equal(referenceValue(entry,card,true,ctx).value,0);
+ ctx.level=2;assert.equal(referenceValue(entry,card,true,ctx).value,null);
+ ctx.level=6;assert.equal(referenceValue(entry,card,false,ctx).value,12.5);
+ slots[2].type='reserve';assert.equal(referenceValue(entry,card,true,ctx).value,null);
+});
+test('source aliases are explicit, collision-safe, and bind to official names',()=>{
+ const index=referenceIndex(data);
+ for(const row of data.cards.filter(r=>r.aliases))for(const name of row.aliases)assert.equal(referenceFor({name,kind:row.kind},index),row);
+ const row={kind:'assist',name:'正式名',aliases:['資料名'],stats:{ss:{base:1,active:1}}};
+ const collided=referenceIndex({schemaVersion:1,cards:[row,{...row,name:'資料名',aliases:[]}]});
+ assert.equal(referenceFor({kind:'assist',name:'資料名'},collided),null);
+ assert.equal(referenceFor({kind:'assist',name:'正式名'},collided),row);
+});
+test('published +5 strengthening applies without reviving old growth tables',()=>{
+ const index=referenceIndex(data),card={name:'泣き母鬼の赤い果実',kind:'assist',overlap:5},entry=referenceFor(card,index).stats.skill;
+ assert.equal(referenceValue(entry,card,true).value,15.8);
+ assert.equal(referenceValue(entry,{...card,overlap:10},true).value,17.5);
 });
