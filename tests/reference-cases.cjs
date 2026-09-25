@@ -6,7 +6,7 @@ test('reference data validates; all reviewed entries have fixed public source an
  const index=referenceIndex(data);assert.equal(index.size,new Set(data.cards.flatMap(r=>[r.name,...(r.aliases||[])].map(n=>r.kind+':'+n.normalize('NFKC').toLocaleLowerCase('ja').replace(/\s/g,'')))).size);
  assert.ok(data.cards.length>=180);
  for(const row of data.cards){assert.ok(referenceFor(row,index));for(const v of Object.values(row.stats)){assert.ok([939,778,788,769,945,1005,984].includes(v.source));assert.equal(v.strength ?? data.defaults.strength,'unspecified');}}
- assert.deepEqual({...JSON.parse(read('data/reference-stats.json')),acquisition:JSON.parse(read('data/acquisition.json'))},JSON.parse(read('dist/reference-stats-1.5.3.json')));
+ assert.deepEqual({...JSON.parse(read('data/reference-stats.json')),acquisition:JSON.parse(read('data/acquisition.json'))},JSON.parse(read('dist/reference-stats-1.5.4.json')));
 });
 test('exact name binding normalizes widths and whitespace, separates kinds and refuses ambiguity',()=>{
  const index=referenceIndex(data);
@@ -44,10 +44,10 @@ test('short loader locks duplicate launches and resets on error/timeout',()=>{
  l.script.onerror();assert.equal(l.window.__wonderDeckLoading,undefined);assert.equal(l.alerts.length,1);l.run();assert.notEqual(l.script,first);l.timeout();assert.equal(l.window.__wonderDeckLoading,undefined);
 });
 test('loader preserves an existing same-version UI and has matching integrity for the versioned script',()=>{
- const l=loader();let shown=0;l.window.__wonderDeck={version:'1.5.3',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
+ const l=loader();let shown=0;l.window.__wonderDeck={version:'1.5.4',show:()=>shown++};l.run();assert.equal(shown,1);assert.equal(l.script,undefined);
  delete l.window.__wonderDeck;l.run();
- assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.5.3.js');
- assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.5.3.js')).digest('base64'));
+ assert.equal(l.script.src,'https://satokoyo.github.io/wlw/wonder-deck-1.5.4.js');
+ assert.equal(l.script.integrity,'sha384-'+crypto.createHash('sha384').update(read('dist/wonder-deck-1.5.4.js')).digest('base64'));
  assert.equal(l.script.crossOrigin,'anonymous');assert.ok(code.length<1600);
 });
 
@@ -115,7 +115,7 @@ test('reviewed values prefer numeric tables and discard superseded or unverified
  assert.equal(v('帽子屋のティーカップ','skill').active,0);
  assert.equal(v('踊り続ける玩具の汽車','skill').active,24.17);
  assert.equal(v('花の妖精王子の羽','skill').base,0);
- assert.equal(v('鬼神の指輪','skill').active,null);
+ assert.equal(v('鬼神の指輪','skill').active,10);
  assert.equal(v('乙女が流した神秘の涙','ds').active,11.8);
  assert.equal(v('魔女が示す宝のマント','ds').active,7.7);
 });
@@ -150,8 +150,8 @@ test('errata remove obsolete offensive effects and do not reuse pre-nerf DS caps
  const sword=get('意思持つ災厄の魔法剣');
  assert.deepEqual(Object.values(sword).map(v=>[v.base,v.active]),[[2.35,2.35],[2.17,2.17],[0,0]]);
  assert.equal(get('幻炎に映る聖樹').ds.active,3.7);
- assert.equal(get('鍔鳴る人喰いの魔刃').ds.active,null);
- assert.equal(get('九環の錫杖').ds.active,null);
+ assert.equal(get('鍔鳴る人喰いの魔刃').ds.active,17.2);
+ assert.equal(get('九環の錫杖').ds.active,12.2);
 });
 test('MS category equipment gates survive max-effect assumptions and reserve does not qualify',()=>{
  const index=referenceIndex(data),card={id:'s',name:'破壊少女シヴァ',kind:'soul'},entry=referenceFor(card,index).stats.ss;
@@ -199,4 +199,45 @@ test('published +5 strengthening applies without reviving old growth tables',()=
  const index=referenceIndex(data),card={name:'泣き母鬼の赤い果実',kind:'assist',overlap:5},entry=referenceFor(card,index).stats.skill;
  assert.equal(referenceValue(entry,card,true).value,15.8);
  assert.equal(referenceValue(entry,{...card,overlap:10},true).value,17.5);
+});
+
+
+test('unmentioned offensive stats are zero despite giant damage, dedicated metadata and unrelated modifiers',()=>{
+ const c={kind:'soul',peculiar:[{na:'リン'}],effect:'assstibs▲最大HPが上がるbs〔特殊〕▲スキル消費ＭＰが減少しストレート射程とドロー防御力が上がるbs【ソウル】巨人召喚 敵城に大ダメージを与える'};
+ for(const stat of ['ss','ds','skill'])assert.equal(referenceValue(undefined,c,true,null,stat).value,0,stat);
+ const ss={kind:'assist',effect:'assstibs▲ストレート攻撃力が上がる'};
+ assert.equal(referenceValue(undefined,ss,true,null,'ds').value,0);
+ assert.equal(referenceValue(undefined,ss,true,null,'skill').value,0);
+ assert.equal(referenceValue(undefined,ss,true,null,'ss').value,null);
+ assert.equal(referenceValue(undefined,{kind:'assist',effect:''},true,null,'ss').value,null);
+ assert.equal(referenceValue(undefined,{kind:'assist',effect:'assstibs▲攻撃力が上がる'},true,null,'ss').value,null);
+});
+test('latest available historical values are flagged and aggregated without reviving removed effects',()=>{
+ const index=referenceIndex(data),card={id:'x',name:'鍔鳴る人喰いの魔刃',kind:'assist',level:3},entry=referenceFor(card,index).stats.ds;
+ assert.equal(referenceValue(entry,card,true).value,17.2);assert.equal(referenceValue(entry,card,true).historical,true);
+ assert.equal(referenceValue(entry,card,false).historical,false);
+ const total=referenceTotals([{id:'x',type:'assist'}],new Map([['x',card]]),index,8,true);
+ assert.equal(total.ds.value,17.2);assert.equal(total.ds.historical,1);
+ const removed=referenceFor({kind:'assist',name:'意思持つ災厄の魔法剣'},index).stats;
+ assert.equal(removed.skill.active,0);assert.equal(removed.ds.active,2.17);
+ const latest=referenceFor({kind:'assist',name:'九環の錫杖'},index).stats.ds;
+ assert.equal(latest.active,12.2);assert.equal(latest.historicalStates,undefined);
+});
+
+test('activation triggers and debuff resistance are not offensive stat changes',()=>{
+ for(const effect of ['assstibs▲スキルを一定回数使用するたびにMPが回復する','assstibs▲スキルの妨害効果を無効化する','assstibs▲マスタースキルのカテゴリが強化の場合リンク攻撃力が上がる','assstibs▲スキルとドローショットの消費MPが下がる']){
+  for(const stat of ['ss','ds','skill'])assert.equal(referenceValue(undefined,{kind:'assist',effect},true,null,stat).value,0,effect+stat);
+ }
+ const effect='assstibs▲ストレートショットとドローショットの攻撃力が上がる';
+ assert.equal(referenceValue(undefined,{kind:'assist',effect},true,null,'ss').value,null);
+ assert.equal(referenceValue(undefined,{kind:'assist',effect},true,null,'ds').value,null);
+ assert.equal(referenceValue(undefined,{kind:'assist',effect},true,null,'skill').value,0);
+});
+
+test('initial rarity filter excludes N and can be explicitly cleared or include N',()=>{
+ const {defaultFilter,emptyFilter,filterCards}=require('../src/wonder-deck.js');
+ const cards=[1,2,3,4].map(rarity=>({rarity,kind:'assist',level:1,search:''}));
+ assert.deepEqual(filterCards(cards,defaultFilter(),'2').map(c=>c.rarity),[4,3,2]);
+ const f=defaultFilter();f.rarity.push('1');assert.equal(filterCards(cards,f,'2').length,4);
+ assert.equal(filterCards(cards,emptyFilter(),'2').length,4);
 });

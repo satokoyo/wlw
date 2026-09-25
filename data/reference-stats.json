@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "revision": "2026-09-25.1",
+  "revision": "2026-09-25.2",
   "reviewedAt": "2026-09-25",
   "sources": {
     "939": "https://w.atwiki.jp/wlws/pages/939.html",
@@ -244,10 +244,14 @@
       "stats": {
         "ds": {
           "base": null,
-          "active": null,
+          "active": 12.2,
           "source": 769,
-          "note": "5.38-L後の特殊込みは5.4〜6.1目盛（DS表の尺度で10.8〜12.2）と幅があり確定値不明。旧14を除外。通常DSも現行値未判明",
-          "errata": "5.38-L"
+          "note": "5.38-L後の推定範囲5.4〜6.1目盛をDS尺度10.8〜12.2へ換算。参考試算は上端12.2。実測確定値ではない",
+          "errata": "5.38-L",
+          "approximate": true,
+          "approximateStates": [
+            "active"
+          ]
         }
       }
     },
@@ -331,10 +335,10 @@
       "kind": "assist",
       "stats": {
         "skill": {
-          "base": null,
-          "active": null,
-          "note": "低下効果あり・数値未判明",
-          "source": 788
+          "base": -5,
+          "active": -5,
+          "note": "評価ページに記載された通常スキル攻撃力低下5を採用",
+          "source": 769
         }
       }
     },
@@ -737,9 +741,12 @@
         },
         "ss": {
           "base": 2.35,
-          "active": null,
+          "active": 7.35,
           "source": 939,
-          "note": "修正後の特殊増分は未判明。旧値は採用しない"
+          "note": "旧掲載値：通常2.35＋5.37-C以前の特殊増分5＝7.35。劣勢時の現行増分未判明",
+          "historicalStates": [
+            "active"
+          ]
         }
       },
       "aliases": [
@@ -2125,10 +2132,13 @@
       "kind": "assist",
       "stats": {
         "skill": {
-          "base": null,
+          "base": 3,
           "active": 24.17,
           "source": 788,
-          "note": "5.38-C後の最大成長値。旧成長表の27.5は不採用"
+          "note": "最大は5.38-C後の24.17。通常値は修正後未判明のため旧掲載値3を参考使用",
+          "historicalStates": [
+            "base"
+          ]
         }
       }
     },
@@ -2294,10 +2304,13 @@
         },
         "ds": {
           "base": 3.7,
-          "active": null,
-          "note": "5.38-LでDSの上昇値・上限が下方。旧合計17.2は除外。現行の特殊込みDSは未判明",
+          "active": 17.2,
+          "note": "旧掲載値：5.38-L下方前の特殊込み合計17.2。修正後未判明のため最後の数値を参考使用",
           "source": 769,
-          "errata": "5.38-L"
+          "errata": "5.38-L",
+          "historicalStates": [
+            "active"
+          ]
         },
         "skill": {
           "base": 0,
@@ -2475,11 +2488,15 @@
       "kind": "assist",
       "stats": {
         "skill": {
-          "base": null,
-          "active": null,
+          "base": 10,
+          "active": 10,
           "source": 788,
-          "note": "5.38-L後の値は未判明。旧10は不採用",
-          "errata": "5.38-L"
+          "note": "旧掲載値：5.38-L下方前の10。修正後未判明のため最後の数値を参考使用",
+          "errata": "5.38-L",
+          "historicalStates": [
+            "base",
+            "active"
+          ]
         }
       }
     },
@@ -2714,10 +2731,11 @@
       "kind": "soul",
       "stats": {
         "skill": {
-          "base": null,
-          "active": null,
+          "base": 10,
+          "active": 10,
           "source": 788,
-          "note": "資料中の10は別カードからの推定で未検証のため不明"
+          "note": "Wikiの推定値10（同表記の別カードに基づく未検証値）を参考使用",
+          "approximate": true
         }
       }
     },
@@ -3084,10 +3102,13 @@
       "kind": "soul",
       "stats": {
         "ss": {
-          "base": null,
-          "active": null,
-          "note": "現行値不明",
-          "source": 939
+          "base": 0,
+          "active": 5.5,
+          "note": "旧掲載値：5.37-K以前の最大成長5.5。現行上限未判明のため参考使用",
+          "source": 939,
+          "historicalStates": [
+            "active"
+          ]
         },
         "ds": {
           "base": 0,
@@ -4552,7 +4573,7 @@
       1005,
       984
     ],
-    "rule": "最新の明示されたエラッタを優先。同条件なら数値表を優先。旧値・取り消し線・未検証推定は採用しない。"
+    "rule": "現行の記載を優先。現行値未判明は最後に取得できる数値を旧掲載値として使用。廃止された効果は復活させない。推定値・幅の上端使用を明記。"
   },
   "defaults": {
     "strength": "unspecified"
