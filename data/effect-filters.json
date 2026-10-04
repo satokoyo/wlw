@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-09-25",
+  "reviewedAt": "2026-10-04",
   "source": "https://wonderland-wars.net/rankdata/cardlist.json",
   "definitions": {
     "evade": "回避距離",
@@ -33,14 +33,6 @@
       "effects": [
         "skillPower",
         "killDamage"
-      ]
-    },
-    {
-      "id": "022dec7336cc922855bac31498293a32",
-      "name": "伏龍の白羽扇",
-      "kind": "assist",
-      "effects": [
-        "skillPower"
       ]
     },
     {
@@ -244,6 +236,14 @@
       "effects": [
         "evade",
         "skillPower"
+      ]
+    },
+    {
+      "id": "16f6075762ba0b7e2a54add3dfbff906",
+      "name": "泉の武器商人ヘルメス",
+      "kind": "soul",
+      "effects": [
+        "killDamage"
       ]
     },
     {
@@ -716,6 +716,14 @@
       ]
     },
     {
+      "id": "4ccd1d052855441e90211d1f072634f0",
+      "name": "伝国の玉璽",
+      "kind": "assist",
+      "effects": [
+        "skillPower"
+      ]
+    },
+    {
       "id": "4f2e1e654915ef92c43e4d782d213203",
       "name": "鋭き雪華のかんざし",
       "kind": "assist",
@@ -914,7 +922,7 @@
       "name": "誠実な王の服",
       "kind": "assist",
       "effects": [
-        "expRange"
+        "skillPower"
       ]
     },
     {
@@ -968,6 +976,14 @@
     {
       "id": "6df546355f0ae6558751dc615449f97b",
       "name": "神光の七星剣",
+      "kind": "assist",
+      "effects": [
+        "skillPower"
+      ]
+    },
+    {
+      "id": "7016a178d82396f49122e44e4ed679e5",
+      "name": "冥界を渡るランタン",
       "kind": "assist",
       "effects": [
         "skillPower"
@@ -1933,6 +1949,14 @@
       ]
     },
     {
+      "id": "ee3ccb26f07258c88adc1bf8c5d8e00c",
+      "name": "天女トヨウケビメ",
+      "kind": "soul",
+      "effects": [
+        "skillPower"
+      ]
+    },
+    {
       "id": "f20386e89de9d643b003d274b6fe73e0",
       "name": "青の占星師のヴェール",
       "kind": "assist",
@@ -2002,6 +2026,14 @@
       "kind": "assist",
       "effects": [
         "skillPower"
+      ]
+    },
+    {
+      "id": "fae38f285acba47f9e94e7d2f8d38054",
+      "name": "飛将の赤兎馬",
+      "kind": "assist",
+      "effects": [
+        "expRange"
       ]
     },
     {

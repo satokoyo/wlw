@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-04",
+  "notice": "提供されたVer.5.38-R告知画像を転記。適用日2026-10-05。変更後の特殊攻撃補正値は未確認。数値を推測しない。",
+  "source": "https://info-wonder.sega.jp/",
+  "cards": [
+    {
+      "id": "022dec7336cc922855bac31498293a32",
+      "name": "伏龍の白羽扇",
+      "kind": "assist",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔fcr小fs／中／大／特大〕　fcr▲ストレート攻撃力が上がるfs\n〔fcr小fs／中／大／特大〕　fcr▲ドロー攻撃力が上がるfs\n〔　　　特殊　　　〕　fcr▲ＭＰが一定値以上の時ドロー攻撃力が上がる\nこの効果は発動時の残りＨＰ割合が多いほど高いfs\n〔　　　特殊　　　〕　fcr▲森の外にいるとドローショットの射程と弾速が上がるfs",
+      "flags": 3,
+      "unknownActive": [
+        "ds"
+      ]
+    },
+    {
+      "id": "38c9063fd5d62cdfda3023085b79490e",
+      "name": "マグスの魔笛",
+      "kind": "assist",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔小／fcr中fs／大／特大〕　fcr▲ストレート攻撃力が上がるfs\n〔　　　特殊　　　〕　fcr▲ＭＰが一定値以上の時ストレート攻撃力とスピードが上がる\nこの効果は発動時の残りＨＰ割合が多いほど高いfs\n〔　　　特殊　　　〕　fcr▲森の外にいるとダウン追い打ちダメージとストレートショットの弾サイズが上がるfs",
+      "flags": 5,
+      "unknownActive": [
+        "ss"
+      ]
+    },
+    {
+      "id": "6378a4b29ccd6056d243c8befb88b357",
+      "name": "誠実な王の服",
+      "kind": "assist",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔fcr小fs／中／大／特大〕　fcr▲最大ＨＰが上がるfs\n〔fcb小fs／中／大／特大〕　fcb▼ドロー攻撃力が下がるfs\n〔　　　特殊　　　〕　fcr▲一定数以上のチェインを一定回数発動させると一定時間最大ＨＰと攻撃力が上がりＨＰ継続回復状態となるfs\n※効果終了後、再発動不可",
+      "flags": 11,
+      "unknownActive": [
+        "ss",
+        "ds",
+        "skill"
+      ]
+    },
+    {
+      "id": "fe4d0043dfd6f543fda13956972a2bc9",
+      "name": "横綱熊の化粧廻し",
+      "kind": "assist",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔小／fcr中fs／大／特大〕　fcr▲最大ＨＰが上がるfs\n〔　　　特殊　　　〕　fcr▲ＭＰが一定割合以上の時ＨＰが回復するfs\n〔　　　特殊　　　〕　fcb▲ＭＰが一定割合以上の時ＭＰが減少するfs",
+      "flags": 8,
+      "unknownActive": []
+    },
+    {
+      "id": "fae38f285acba47f9e94e7d2f8d38054",
+      "name": "飛将の赤兎馬",
+      "kind": "assist",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔小／fcr中fs／大／特大〕　fcr▲スピードが上がるfs\n〔　　　特殊　　　〕　fcr▲経験値獲得範囲が拡大しＭＰ回復速度が上がる\nさらに敵兵士に攻撃する度にスピードが一定値まで上がるfs",
+      "flags": 4,
+      "unknownActive": []
+    },
+    {
+      "id": "c495a1d3b42edb84956fe1cc51046fa6",
+      "name": "歌声響く金のハープ",
+      "kind": "assist",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔fcr小fs／中／大／特大〕　fcr▲最大ＭＰが上がるfs\n〔fcr小fs／中／大／特大〕　fcr▲スピードが上がるfs\n〔fcb小fs／中／大／特大〕　fcb▼ドロー攻撃力が下がるfs\n〔　　　特殊　　　〕　fcr▲一定時間経過するたびに一定時間スピードが上がる\nこの効果は発動時の残りＨＰ割合が少ないほど高いfs\n〔　　　特殊　　　〕　fcr▲一定時間経過するたびに一定時間防御力が上がる\nこの効果は発動時の残りＨＰ割合が多いほど高いfs",
+      "flags": 20,
+      "unknownActive": []
+    },
+    {
+      "id": "7016a178d82396f49122e44e4ed679e5",
+      "name": "冥界を渡るランタン",
+      "kind": "assist",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔fcr小fs／中／大／特大〕　fcr▲最大ＨＰが上がるfs\n〔fcr小fs／中／大／特大〕　fcr▲最大ＭＰが上がるfs\n〔　　　特殊　　　〕　fcr▲レベルアップ時一定時間ＨＰ継続回復状態となる\nこの効果は発動時の残りＨＰ割合が少ないほど高いfs\n〔　　　特殊　　　〕　fcr▲レベルアップ時一定時間攻撃力が上がる\nこの効果は発動時の残りＨＰ割合が多いほど高いfs",
+      "flags": 27,
+      "unknownActive": [
+        "ss",
+        "ds",
+        "skill"
+      ]
+    },
+    {
+      "id": "4ccd1d052855441e90211d1f072634f0",
+      "name": "伝国の玉璽",
+      "kind": "assist",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔fcr小fs／中／大／特大〕　fcr▲最大ＭＰが上がるfs\n〔　　　特殊　　　〕　fcr▲ＭＰが一定値以上の時スキル攻撃力が上がる\nこの効果は発動時の残りＨＰ割合が多いほど高いfs\n〔　　　特殊　　　〕　fcr▲森の外にいるとスピードが上がりスキル消費ＭＰが減少するfs",
+      "flags": 20,
+      "unknownActive": [
+        "skill"
+      ]
+    },
+    {
+      "id": "ee3ccb26f07258c88adc1bf8c5d8e00c",
+      "name": "天女トヨウケビメ",
+      "kind": "soul",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔fcr小fs／中／大／特大〕　fcr▲最大ＭＰが上がるfs\n〔fcr小fs／中／大／特大〕　fcr▲スピードが上がるfs\n〔　　　特殊　　　〕　fcr▲このカード以外にレアリティがＳＲのアシストカードが１枚以上発動している場合ＨＰが回復し攻撃力が上がるfs\n〔　　　特殊　　　〕　fcr▲このカード以外にレアリティがＳＲのアシストカードが２枚以上発動している場合ドロー消費ＭＰとスキル消費ＭＰが下がるfs\n【ソウル】巨人召喚　貫通光\n敵に貫通攻撃をしながら、敵拠点へ向かう巨人を召喚する。",
+      "flags": 23,
+      "unknownActive": [
+        "ss",
+        "ds",
+        "skill"
+      ]
+    },
+    {
+      "id": "16f6075762ba0b7e2a54add3dfbff906",
+      "name": "泉の武器商人ヘルメス",
+      "kind": "soul",
+      "errata": true,
+      "date": "2026-10-05",
+      "version": "5.38-R",
+      "effect": "asssti\n〔fcr小fs／中／大／特大〕　fcr▲最大ＨＰが上がるfs\n〔fcr小fs／中／大／特大〕　fcr▲ドロー攻撃力が上がるfs\n〔　　　特殊　　　〕　fcr▲一定時間経過するたびに一定時間ストレート攻撃力とスピードが上がる\nこの効果は発動時の残りＨＰ割合が多いほど高いfs\n〔　　　特殊　　　〕　fcr▲一定時間経過するたびに一定時間ストレートショットの射程と撃破ダメージが上がるfs\n【ソウル】巨人召喚　強化陣\n周囲を常時強化しながら、敵拠点へ向かう巨人を召喚する。",
+      "flags": 15,
+      "unknownActive": [
+        "ss"
+      ]
+    }
+  ]
+}

@@ -34,8 +34,11 @@ fs.writeFileSync(path.join(dist,'wonder-deck-'+version+'.js'),compact);
 fs.writeFileSync(path.join(dist,'wonder-deck.standalone.txt'),standalone+'\n');
 const reference=JSON.parse(fs.readFileSync(path.join(root,'data/reference-stats.json'),'utf8'));
 reference.effectFilters=JSON.parse(fs.readFileSync(path.join(root,'data/effect-filters.json'),'utf8'));
+reference.errata=JSON.parse(fs.readFileSync(path.join(root,'data/card-errata.json'),'utf8'));
 reference.acquisition=JSON.parse(fs.readFileSync(path.join(root,'data/acquisition.json'),'utf8'));
+reference.dataRevision=require('node:crypto').createHash('sha256').update(JSON.stringify(reference)).digest('hex').slice(0,16);
 fs.writeFileSync(path.join(dist,'reference-stats-'+version+'.json'),JSON.stringify(reference)+'\n');
+fs.writeFileSync(path.join(dist,'release.json'),JSON.stringify({schemaVersion:1,version,dataRevision:reference.dataRevision,script:'wonder-deck-'+version+'.js',reference:'reference-stats-'+version+'.json',integrity})+'\n');
 fs.copyFileSync(path.join(root,'data/README.md'),path.join(dist,'DATA-NOTICE.txt'));
 console.log(JSON.stringify({sourceBytes:Buffer.byteLength(source),compactBytes:Buffer.byteLength(compact),bookmarkCharacters:bookmark.length}));
 

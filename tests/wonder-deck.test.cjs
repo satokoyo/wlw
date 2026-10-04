@@ -415,3 +415,5 @@ test('W3 names are ASCII-only and round-trip Japanese and emoji; old W2 stays re
 });
 
 require('./effect-filters.cjs');
+
+require("./errata-cases.cjs");
