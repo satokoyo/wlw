@@ -4,7 +4,7 @@
 /* WonderLandDeck 1.0 — self-contained Wonder.NET deck editor. */
 (function () {
   'use strict';
-  const VERSION = '1.5.6';
+  const VERSION = '1.5.7';
   const GROUPS = ['skill', 'master', 'assist', 'soul', 'reserve'];
   const TYPES = {1: 'skill', 2: 'assist', 3: 'soul', 8: 'mskill'};
   const LABEL = {skill: 'スキル', assist: 'アシスト', soul: 'ソウル', mskill: 'マスタースキル', reserve: 'リザーブ'};
@@ -723,7 +723,7 @@
     const values=referenceTotals(e.slots,catalog,referenceMap,referenceLevel,referenceActive,referenceCastContext().castName,referenceCastContext().role);
     return `<section class="reference"><strong>装備の掲載値小計（参考）</strong><div>${Object.entries(values).map(([k,v])=>`${STAT_LABELS[k]} ${v.known?(v.approximate?'≈':'')+refNumber(v.value):'—'} <small>不明${v.unknown}枚${v.calibrated?' · 強化値対応'+v.calibrated+'枚':''}${v.historical?' · 旧値'+v.historical+'枚':''}</small>`).join('<br>')}</div><details><summary>計算条件・注意</summary><label>想定Lv <select id="reference-level">${Array.from({length:8},(_,i)=>`<option ${referenceLevel===i+1?'selected':''}>${i+1}</option>`).join('')}</select></label><label><input id="reference-active" type="checkbox" ${referenceActive?'checked':''}>特殊効果の最大成長・条件達成を仮定</label><p>Wiki掲載値の比較用。記載のない強化値は未補正。装備条件・MSカテゴリ・専用ロールは対応項目のみ判定。≈は概算を含む小計。†は修正後の数値が未判明のため最後の掲載値を使用。影響なしを公式効果文で確認できた項目は0。${referenceActive?'成長型は最大値を使用。森の内外など相反する条件を含む個別最大の小計であり、全効果が同時発動する実戦値ではありません。戦闘条件を仮定しますが、装備条件の不足は除外し、発動する低下効果も差し引きます。':'通常値と対応する装備条件が成立する効果を集計。'}リザーブ・キャスト基礎値・バフ・未収録の増減は含みません。能力間で尺度が異なるため、SS・DS・スキル同士は合算しません。</p><p>${esc(referenceState)} · ${esc(referenceData?.reviewedAt || '')}</p></details></section>`;
   }
-  async function loadReference(file='reference-stats-1.5.6.json'){
+  async function loadReference(file='reference-stats-1.5.7.json'){
     const ctl=new AbortController();aborts.add(ctl);const timer=setTimeout(()=>ctl.abort(),12000);
     try{
       const response=await fetch('https://satokoyo.github.io/wlw/'+file,{credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
@@ -735,7 +735,7 @@
       referenceData=data;referenceMap=index;customEffectIndex=effects;errataIndex=revisions;referenceState='取得済み';
       for(const [id,c] of catalog)catalog.set(id,applyCardErrata(c));
       if(engine){engine.cards=engine.cards.map(c=>applyCardErrata(c));engine.rankings=engine.rankings.map(c=>applyCardErrata(c));engine.currentDetail=applyCardErrata(engine.currentDetail);engine.selected=applyCardErrata(engine.selected);if(engine.allowed)engine.allowed=new Map([...engine.allowed].map(([id,c])=>[id,applyCardErrata(c)]));}
-      $('#errata-date').innerHTML='<option value="">すべて</option><option value="any">収録済みエラッタすべて</option>'+[...new Set([...revisions.values()].map(r=>r.date))].sort().reverse().map(date=>`<option value="${date}">${date.replaceAll('-','/')}</option>`).join('');$('#errata-date').value=filter.errataDate;$('#errata-date').disabled=false;updateNotice();
+      $('#errata-date').innerHTML='<option value="">すべて</option><option value="any">収録済みエラッタすべて</option>'+[...new Set([...revisions.values()].map(r=>r.date))].sort().reverse().map(date=>`<option value="${date}">${date.replaceAll('-','/')}（${esc([...new Set([...revisions.values()].filter(r=>r.date===date).map(r=>r.version))].join(' / '))}）</option>`).join('');$('#errata-date').value=filter.errataDate;$('#errata-date').disabled=false;updateNotice();
     }catch(err){referenceState='取得できません（カード編集は利用できます）';}
     finally{clearTimeout(timer);aborts.delete(ctl);if(host.isConnected){$$('[data-custom-effect]').forEach(el=>{el.disabled=referenceState!=='取得済み';el.title=el.disabled?'独自能力データを取得できません。メニューから再読込してください。':'条件付き・固有の上昇効果を含みます';});deckRenderKey='';listRef=null;render();}}
   }
